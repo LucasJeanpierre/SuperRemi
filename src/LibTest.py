@@ -1,5 +1,6 @@
 import unittest
-from ModularMath import ModularMath
+from tools.ModularMath import ModularMath
+from tools.Cipher import RSA
 
 class TestGCD(unittest.TestCase):
 
@@ -53,6 +54,17 @@ class TestIsPrime(unittest.TestCase):
         
             def test_is_prime_5(self):
                 self.assertEqual(ModularMath.is_prime(13216587986546542), False)
+
+
+class TestRSA(unittest.TestCase):
+    
+    def test_rsa(self):
+        public_key, private_key = RSA.keyGen()
+        message = "Hello World!"
+        cipher = RSA(public_key, private_key)
+        encrypted_message = cipher.encrypt(message)
+        decrypted_message = cipher.decrypt(encrypted_message)
+        self.assertEqual(message, decrypted_message)
         
 
 if __name__ == "__main__":

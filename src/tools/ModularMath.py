@@ -61,3 +61,15 @@ class ModularMath:
                 return False
         return True
 
+    @staticmethod
+    def generate_prime_number(bits):
+        """
+        Generate a prime number with a given number of bits
+        :param bits: number of bits
+        :return: prime number
+        """
+        while True:
+            n = random.randrange(2**(bits-1), 2**(bits))
+            if ModularMath.is_prime(n):
+                return n
+
