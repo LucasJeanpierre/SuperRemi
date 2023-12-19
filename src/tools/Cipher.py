@@ -2,6 +2,7 @@ import bitarray
 from tools.ModularMath import ModularMath
 import logging
 import libnum
+import random
 
 
 class Cipher():
@@ -41,7 +42,6 @@ class AsymmetricCipher(Cipher):
         self.private_key = private_key
         self.public_key = public_key
 
-        
 
 
 class SerpentCipher(SymmetricCipher):
@@ -59,6 +59,41 @@ class SerpentCipher(SymmetricCipher):
         0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 124, 1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62, 66, 70, 74, 78, 82, 86, 90, 94, 98, 102, 106, 110, 114, 118, 122, 126, 3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 43, 47, 51, 55, 59, 63, 67, 71, 75, 79, 83, 87, 91, 95, 99, 103, 107, 111, 115, 119, 123, 127
     ]
 
+    SBox = [
+        [2, 12, 10, 4, 9, 14, 3, 11, 13, 5, 15, 6, 1, 0, 8, 7],
+        [9, 4, 10, 0, 8, 2, 14, 12, 5, 6, 15, 11, 1, 13, 7, 3],
+        [5, 10, 1, 15, 8, 2, 9, 7, 14, 6, 3, 4, 0, 11, 12, 13],
+        [0, 9, 7, 13, 3, 1, 12, 4, 2, 8, 5, 6, 10, 15, 11, 14],
+        [15, 14, 10, 4, 5, 9, 1, 12, 0, 2, 3, 11, 7, 6, 8, 13],
+        [11, 2, 1, 0, 14, 7, 9, 15, 3, 12, 4, 10, 8, 13, 6, 5],
+        [14, 6, 4, 1, 0, 7, 10, 2, 9, 12, 8, 11, 5, 3, 15, 13],
+        [9, 12, 14, 8, 5, 10, 1, 13, 0, 2, 6, 7, 3, 11, 15, 4],
+        [4, 0, 8, 13, 14, 5, 10, 1, 2, 7, 11, 12, 3, 9, 6, 15],
+        [10, 13, 5, 14, 15, 4, 8, 0, 2, 3, 12, 7, 9, 1, 11, 6],
+        [6, 11, 15, 13, 8, 2, 14, 12, 1, 5, 7, 10, 3, 4, 9, 0],
+        [2, 5, 11, 13, 6, 3, 12, 0, 9, 10, 1, 7, 14, 8, 15, 4],
+        [6, 10, 11, 0, 7, 1, 14, 8, 13, 9, 2, 15, 5, 12, 3, 4],
+        [11, 10, 9, 2, 3, 5, 12, 14, 8, 4, 7, 15, 6, 13, 0, 1],
+        [14, 6, 2, 5, 12, 4, 15, 1, 10, 8, 7, 0, 11, 3, 9, 13],
+        [12, 14, 3, 10, 5, 8, 7, 13, 1, 0, 11, 4, 6, 2, 15, 9],
+        [10, 9, 1, 6, 8, 14, 15, 5, 7, 12, 2, 3, 4, 0, 11, 13],
+        [15, 4, 3, 2, 5, 10, 0, 14, 12, 7, 8, 1, 6, 9, 11, 13],
+        [15, 8, 14, 5, 9, 10, 11, 13, 7, 4, 3, 12, 1, 6, 2, 0],
+        [10, 5, 8, 6, 4, 14, 7, 2, 9, 13, 15, 3, 11, 0, 1, 12],
+        [12, 7, 6, 13, 1, 2, 5, 10, 9, 0, 11, 14, 8, 4, 15, 3],
+        [6, 3, 11, 13, 8, 5, 4, 10, 9, 12, 15, 2, 14, 7, 0, 1],
+        [11, 4, 14, 5, 8, 0, 3, 10, 9, 12, 2, 7, 6, 1, 13, 15],
+        [4, 3, 9, 11, 5, 8, 10, 12, 13, 7, 2, 15, 1, 6, 0, 14],
+        [10, 11, 5, 1, 7, 3, 14, 15, 6, 4, 2, 9, 8, 0, 12, 13],
+        [4, 11, 14, 9, 15, 1, 13, 2, 8, 10, 3, 7, 12, 0, 6, 5],
+        [5, 1, 13, 7, 12, 9, 3, 10, 0, 15, 4, 11, 14, 6, 8, 2],
+        [8, 2, 14, 9, 5, 4, 0, 12, 3, 7, 10, 11, 6, 15, 13, 1],
+        [1, 11, 12, 2, 4, 6, 15, 10, 9, 7, 3, 8, 13, 5, 0, 14],
+        [10, 13, 2, 8, 6, 4, 14, 0, 3, 9, 15, 7, 12, 11, 1, 5],
+        [13, 14, 15, 4, 2, 5, 9, 12, 0, 7, 10, 3, 8, 11, 1, 6],
+        [3, 8, 11, 7, 5, 13, 2, 12, 4, 9, 15, 1, 6, 10, 0, 14],
+    ]
+
     def encrypt(self, plaintext):
         """
         Serpent encryption
@@ -66,10 +101,20 @@ class SerpentCipher(SymmetricCipher):
         :return ciphertext: str
         """
 
+        # Split the plaintext into 128 bits blocks
         blocks = self.splitPlainTextToBlocks(plaintext)
+
+        # Initial permutation
         ciphertext = bitarray.bitarray()
-        for block in blocks: 
+        for block in blocks:
             ciphertext.extend(self.blockInitialPermutation(block))
+    
+        # Sbox
+        for i in range(0, len(ciphertext), 128):
+            block = ciphertext[i:i+128]
+            ciphertext[i:i+128] = self.blockEncryption(block)
+
+
         return ciphertext.to01()
 
 
@@ -79,13 +124,78 @@ class SerpentCipher(SymmetricCipher):
         :param ciphertext: ciphertext
         :return plaintext: str
         """
-        
+
         blocks = self.splitCipherTextToBlocks(ciphertext)
         plaintext = bitarray.bitarray()
+        
         for block in blocks:
             plaintext.extend(self.blockFinalPermutation(block))
-        return plaintext.tobytes().decode("utf-8").rstrip('\x00')
+        
 
+    
+
+    def blockEncryption(self, block):
+        """
+        Serpent block encryption
+        :param block: 128 bits block
+        :return: 128 bits block
+        """
+
+        keys = [bitarray.bitarray(self.key) for i in range(32)]
+
+        # 32 rounds
+        for i in range(32):
+            block = self.round(block, keys[i])
+        return block
+        
+    def round(self, block, key):
+        """
+        Serpent round
+        :param block: 128 bits block
+        :param key: 32 bits key
+        :return: 128 bits block
+        """
+        # Temporary
+        # Force key size to 128 bits
+        key = key[:128]
+
+        # XOR with the key
+        block = block ^ key
+
+        # Sbox
+        for i in range(0, len(block), 4):
+            result = bin(int(block[i:i+4].to01(), 2))[2:].zfill(4)
+            block[i:i+4] = bitarray.bitarray(result)
+
+        # Linear transformation
+        block = self.linearTransformation(block)
+
+        return block
+    
+
+    def linearTransformation(self, block):
+        """
+        Serpent linear transformation
+        :param block: 128 bits block
+        :return: 128 bits block
+        """
+        
+        # Split the block into 4 32 bits blocks
+        blocks = []
+        for i in range(0, len(block), 32):
+            blocks.append(block[i:i+32])
+
+        return block
+        
+    
+
+    @staticmethod
+    def keyGen():
+        """
+        Key generation
+        256 bits key
+        """
+        return ''.join([random.choice(["0","1"]) for i in range(256)])
 
 
     @staticmethod
@@ -110,6 +220,8 @@ class SerpentCipher(SymmetricCipher):
             blocks.append(ba[i:i+128])
 
         return blocks
+    
+        
     
     @staticmethod
     def splitCipherTextToBlocks(ciphertext):

@@ -1,4 +1,5 @@
 import unittest
+import bitarray
 from tools.ModularMath import ModularMath
 from tools.Cipher import RSA, SerpentCipher
 
@@ -54,6 +55,12 @@ class TestIsPrime(unittest.TestCase):
         
             def test_is_prime_5(self):
                 self.assertEqual(ModularMath.is_prime(13216587986546542), False)
+
+class TestCirularShift(unittest.TestCase):
+        
+        def test_circular_shift_1(self):
+            self.assertEqual(ModularMath.circular_bit_shift_left(0b1001, 1, direction="left", bit_size=4), 0b0011)
+
 
 
 class TestRSA(unittest.TestCase):

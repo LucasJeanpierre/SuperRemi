@@ -73,3 +73,26 @@ class ModularMath:
             if ModularMath.is_prime(n):
                 return n
 
+    @staticmethod
+    def circular_bit_shift_left(block, shift, direction="left", bit_size=32):
+        """
+        Circular bit shift
+        :param block: bitarray to shift
+        :param shift: number of bits to shift
+        :param bit_size: size of the bitarray
+        :param direction: direction of the shift
+        :return: shifted bitarray
+        """
+        reuslt = None
+        match direction:
+            case "left":
+                shift = shift % bit_size
+                result = (block << shift) | (block >> (bit_size - shift))
+                result = result & ((1 << bit_size) - 1)
+            case "right":
+                shift = shift % bit_size
+                result = (block >> shift) | (block << (bit_size - shift))
+                result = result & ((1 << bit_size) - 1)
+            case _:
+                raise ValueError("Invalid direction")
+        return result

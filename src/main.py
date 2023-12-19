@@ -111,10 +111,9 @@ if __name__ == "__main__":
                 case _:
                     print("Commande non reconnue")
     else:
-        Serpent = SerpentCipher("bonsoir")
-        message = "Hello World!"
-        print("Message: ", message)
+        secret_key = SerpentCipher.keyGen()
+        Serpent = SerpentCipher(secret_key)
+        message = "Hello World! comment ça va tout le monde"
+        print("message: ", message)
         encrypted_message = Serpent.encrypt(message)
-        print("cipher text : ", encrypted_message)
-        decrypted_message = Serpent.decrypt(encrypted_message)
-        print("decrypted message: ", decrypted_message)
+        print("encrypted message: ", encrypted_message)
