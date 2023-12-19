@@ -2,6 +2,9 @@ from tools.Cipher import *
 import logging
 import json
 
+
+DEBUG = True
+
 logo = [
 "   _____                       _____                _ ",
 "  / ____|                     |  __ \\              (_)",
@@ -26,84 +29,92 @@ Instructions = [
 
 if __name__ == "__main__":
     
-    with open("keys.json", "r") as f:
-        try:
-            keys = json.load(f)
-            public_key = keys["public_key"]
-            private_key = keys["private_key"]
-            secret_key = keys["secret_key"]
-            logging.info("keys loaded from keys.json")
-        except:
-            public_key = None
-            private_key = None
-            secret_key = None
+    if not DEBUG:
+        with open("keys.json", "r") as f:
+            try:
+                keys = json.load(f)
+                public_key = keys["public_key"]
+                private_key = keys["private_key"]
+                secret_key = keys["secret_key"]
+                logging.info("keys loaded from keys.json")
+            except:
+                public_key = None
+                private_key = None
+                secret_key = None
 
-    print(public_key, private_key)
+        print(public_key, private_key)
 
 
-    for line in logo:
-        print(line)
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
-    logging.info("Application started")
-
-    while True:
-        for line in Instructions:
+        for line in logo:
             print(line)
-        choice = input("> ")
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+        logging.info("Application started")
 
-        match choice:
-            case "1":
-                print("Chiffrer un message")
-                if public_key is None:
-                    print("Veuillez générer une paire de clés")
-                    continue
-                message = input("Message: ")
-                cipher = RSA(public_key, private_key)
-                encrypted_message = cipher.encrypt(message)
-                print("Message chiffré: ", encrypted_message)
+        while True:
+            for line in Instructions:
+                print(line)
+            choice = input("> ")
 
-            case "2":
-                print("Déchiffrer un message")
-                if private_key is None:
-                    print("Veuillez générer une paire de clés")
-                    continue
-                message = input("Message: ")
-                cipher = RSA(public_key, private_key)
-                decrypted_message = cipher.decrypt(message)
-                print("Message déchiffré: ", decrypted_message)
+            match choice:
+                case "1":
+                    print("Chiffrer un message")
+                    if public_key is None:
+                        print("Veuillez générer une paire de clés")
+                        continue
+                    message = input("Message: ")
+                    cipher = RSA(public_key, private_key)
+                    encrypted_message = cipher.encrypt(message)
+                    print("Message chiffré: ", encrypted_message)
 
-            case "3":
-                print("Générer un couple de clés")
-                keys = RSA.keyGen()
-                print("Clé publique: ", keys[0])
-                print("Clé privée: ", keys[1])
-                public_key = keys[0]
-                private_key = keys[1]
+                case "2":
+                    print("Déchiffrer un message")
+                    if private_key is None:
+                        print("Veuillez générer une paire de clés")
+                        continue
+                    message = input("Message: ")
+                    cipher = RSA(public_key, private_key)
+                    decrypted_message = cipher.decrypt(message)
+                    print("Message déchiffré: ", decrypted_message)
 
-                with open("keys.json", "w") as f:
-                    json.dump({"public_key": public_key, "private_key": private_key, "secret_key": secret_key}, f)
+                case "3":
+                    print("Générer un couple de clés")
+                    keys = RSA.keyGen()
+                    print("Clé publique: ", keys[0])
+                    print("Clé privée: ", keys[1])
+                    public_key = keys[0]
+                    private_key = keys[1]
 
-                logging.info("keys stored for the current session and in keys.json")
+                    with open("keys.json", "w") as f:
+                        json.dump({"public_key": public_key, "private_key": private_key, "secret_key": secret_key}, f)
 
-            case "4":
-                print("Signer un certificat")
+                    logging.info("keys stored for the current session and in keys.json")
 
-            case "5":
-                print("Vérifier un certificat")
+                case "4":
+                    print("Signer un certificat")
 
-            case "6":
-                print("Enregistrer un document dans un coffre fort")
+                case "5":
+                    print("Vérifier un certificat")
 
-            case "7":
-                print("Envoyer un message (asychrone)")
+                case "6":
+                    print("Enregistrer un document dans un coffre fort")
 
-            case "8":
-                print("Demander un preuve de connaissance")
+                case "7":
+                    print("Envoyer un message (asychrone)")
 
-            case "9":
-                print("Quitter")
-                exit()
+                case "8":
+                    print("Demander un preuve de connaissance")
 
-            case _:
-                print("Commande non reconnue")
+                case "9":
+                    print("Quitter")
+                    exit()
 
+                case _:
+                    print("Commande non reconnue")
+    else:
+        Serpent = SerpentCipher("bonsoir")
+        message = "Hello World!"
+        print("Message: ", message)
+        encrypted_message = Serpent.encrypt(message)
+        print("cipher text : ", encrypted_message)
+        decrypted_message = Serpent.decrypt(encrypted_message)
+        print("decrypted message: ", decrypted_message)

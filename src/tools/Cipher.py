@@ -56,16 +56,99 @@ class SerpentCipher(SymmetricCipher):
     ]
 
     FPTable = [
-          0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 124, 1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62, 66, 70, 74, 78, 82, 86, 90, 94, 98, 102, 106, 110, 114, 118, 122, 126, 3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 43, 47, 51, 55, 59, 63, 67, 71, 75, 79, 83, 87, 91, 95, 99, 103, 107, 111, 115, 119, 123, 127
+        0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 124, 1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62, 66, 70, 74, 78, 82, 86, 90, 94, 98, 102, 106, 110, 114, 118, 122, 126, 3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 43, 47, 51, 55, 59, 63, 67, 71, 75, 79, 83, 87, 91, 95, 99, 103, 107, 111, 115, 119, 123, 127
     ]
 
     def encrypt(self, plaintext):
-        print("Encrypting")
+        """
+        Serpent encryption
+        :param plaintext: plaintext
+        :return ciphertext: str
+        """
 
-    def key_schedule(self):
+        blocks = self.splitPlainTextToBlocks(plaintext)
+        ciphertext = bitarray.bitarray()
+        for block in blocks: 
+            ciphertext.extend(self.blockInitialPermutation(block))
+        return ciphertext.to01()
+
+
+    def decrypt(self, ciphertext):
         """
-        Key schedule
+        Serpent decryption
+        :param ciphertext: ciphertext
+        :return plaintext: str
         """
+        
+        blocks = self.splitCipherTextToBlocks(ciphertext)
+        plaintext = bitarray.bitarray()
+        for block in blocks:
+            plaintext.extend(self.blockFinalPermutation(block))
+        return plaintext.tobytes().decode("utf-8").rstrip('\x00')
+
+
+
+    @staticmethod
+    def splitPlainTextToBlocks(plaintext):
+        """
+        Split the plaintext into 128 bits blocks
+        :param plaintext: plaintext
+        :return: bitarray of 128 bits blocks
+        """
+
+        # Turn the plaintext into a bitarray
+        ba = bitarray.bitarray()
+        ba.frombytes(plaintext.encode("utf-8"))
+
+        # Add padding if necessary
+        if len(ba) % 128 != 0:
+            ba.extend(bitarray.bitarray("0" * (128 - len(ba) % 128)))
+
+        # Split the plaintext into 128 bits blocks
+        blocks = []
+        for i in range(0, len(ba), 128):
+            blocks.append(ba[i:i+128])
+
+        return blocks
+    
+    @staticmethod
+    def splitCipherTextToBlocks(ciphertext):
+        """
+        Split the ciphertext into 128 bits blocks
+        :param ciphertext: ciphertext
+        :return: bitarray of 128 bits blocks
+        """
+
+        # Turn the ciphertext into a bitarray
+        ba = bitarray.bitarray(ciphertext)
+
+        # Split the ciphertext into 128 bits blocks
+        blocks = []
+        for i in range(0, len(ba), 128):
+            blocks.append(ba[i:i+128])
+
+        return blocks
+
+
+    @staticmethod
+    def blockInitialPermutation(block):
+        """
+        Initial permutation of the block
+        :param block: 128 bits block
+        :return: 128 bits block
+        """
+        return bitarray.bitarray([block[i] for i in SerpentCipher.IPTable])
+    
+    @staticmethod
+    def blockFinalPermutation(block):
+        """
+        Final permutation of the block
+        :param block: 128 bits block
+        :return: 128 bits block
+        """
+        return bitarray.bitarray([block[i] for i in SerpentCipher.FPTable])
+    
+
 
 
 class RSA(AsymmetricCipher):

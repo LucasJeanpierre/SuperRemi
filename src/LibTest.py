@@ -1,6 +1,6 @@
 import unittest
 from tools.ModularMath import ModularMath
-from tools.Cipher import RSA
+from tools.Cipher import RSA, SerpentCipher
 
 class TestGCD(unittest.TestCase):
 
@@ -66,6 +66,16 @@ class TestRSA(unittest.TestCase):
         decrypted_message = cipher.decrypt(encrypted_message)
         self.assertEqual(message, decrypted_message)
         
+
+
+class TestSerpent(unittest.TestCase):
+    
+    def test_serpent(self):
+        Serpent = SerpentCipher("bonsoir")
+        message = "Hello World!"
+        encrypted_message = Serpent.encrypt(message)
+        decrypted_message = Serpent.decrypt(encrypted_message)
+        self.assertEqual(message, decrypted_message)
 
 if __name__ == "__main__":
     unittest.main()
