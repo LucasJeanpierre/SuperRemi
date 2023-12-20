@@ -153,8 +153,9 @@ class SerpentCipher(SymmetricCipher):
         keys = [bitarray.bitarray(self.key) for i in range(32)]
 
         # 32 rounds
-        for i in range(32):
+        for i in range(1):
             block = self.encryptRound(block, keys[i])
+
         return block
     
     def blockDecryption(self, block):
@@ -167,8 +168,9 @@ class SerpentCipher(SymmetricCipher):
         keys = [bitarray.bitarray(self.key) for i in range(32)]
 
         # 32 rounds
-        for i in range(31,-1,-1):
+        for i in range(0,-1,-1):
             block = self.decryptRound(block, keys[i])
+    
 
         return block
         
@@ -277,10 +279,23 @@ class SerpentCipher(SymmetricCipher):
 
         X2 = ModularMath.circular_bit_shift(X2, 22, direction="right", bit_size=32)
         X0 = ModularMath.circular_bit_shift(X0, 5, direction="right", bit_size=32)
+        X2 = X2 ^ X3 ^ ModularMath.bit_shift(X1, 7, direction="left", bit_size=32)
+        X0 = X0 ^ X1 ^ X3
+        X3 = ModularMath.circular_bit_shift(X3, 7, direction="right", bit_size=32)
+        X1 = ModularMath.circular_bit_shift(X1, 1, direction="right", bit_size=32)
+        X3 = X3 ^ X2 ^ ModularMath.bit_shift(X0, 3, direction="left", bit_size=32)
+        X1 = X1 ^ X0 ^ X2
+        X2 = ModularMath.circular_bit_shift(X2, 3, direction="right", bit_size=32)
+        X0 = ModularMath.circular_bit_shift(X0, 13, direction="right", bit_size=32)
 
+        blocks[0] = X0
+        blocks[1] = X1
+        blocks[2] = X2
+        blocks[3] = X3
 
+        result = bitarray.bitarray(blocks[0].to01() + blocks[1].to01() + blocks[2].to01() + blocks[3].to01())
 
-        return block
+        return result
         
     
 
