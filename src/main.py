@@ -113,7 +113,7 @@ if __name__ == "__main__":
     else:
         secret_key = SerpentCipher.keyGen()
         Serpent = SerpentCipher(secret_key)
-        message = "Hello World! comment ça va tout le monde"
+        message = "Hello World!"
         print("message: ", message)
         encrypted_message = Serpent.encrypt(message)
         print("encrypted message: ", encrypted_message)

@@ -78,7 +78,8 @@ class TestRSA(unittest.TestCase):
 class TestSerpent(unittest.TestCase):
     
     def test_serpent(self):
-        Serpent = SerpentCipher("bonsoir")
+        key = SerpentCipher.keyGen()
+        Serpent = SerpentCipher(key)
         message = "Hello World!"
         encrypted_message = Serpent.encrypt(message)
         decrypted_message = Serpent.decrypt(encrypted_message)

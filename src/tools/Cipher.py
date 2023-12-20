@@ -114,7 +114,6 @@ class SerpentCipher(SymmetricCipher):
             block = ciphertext[i:i+128]
             ciphertext[i:i+128] = self.blockEncryption(block)
 
-
         return ciphertext.to01()
 
 
@@ -127,9 +126,20 @@ class SerpentCipher(SymmetricCipher):
 
         blocks = self.splitCipherTextToBlocks(ciphertext)
         plaintext = bitarray.bitarray()
-        
+
+        # Sbox
         for block in blocks:
-            plaintext.extend(self.blockFinalPermutation(block))
+            plaintext.extend(self.blockDecryption(block))
+        
+        # Final permutation
+        for i in range(0, len(plaintext), 128):
+            block = plaintext[i:i+128]
+            plaintext[i:i+128] = self.blockFinalPermutation(block)
+
+        # bitarray to str
+        plaintext = plaintext.tobytes().decode("utf-8").replace("\x00", "")
+
+        return plaintext
         
 
     
@@ -140,15 +150,29 @@ class SerpentCipher(SymmetricCipher):
         :param block: 128 bits block
         :return: 128 bits block
         """
-
         keys = [bitarray.bitarray(self.key) for i in range(32)]
 
         # 32 rounds
         for i in range(32):
-            block = self.round(block, keys[i])
+            block = self.encryptRound(block, keys[i])
+        return block
+    
+    def blockDecryption(self, block):
+        """
+        Serpent block decryption
+        :param block: 128 bits block
+        :return: 128 bits block
+        """
+
+        keys = [bitarray.bitarray(self.key) for i in range(32)]
+
+        # 32 rounds
+        for i in range(31,-1,-1):
+            block = self.decryptRound(block, keys[i])
+
         return block
         
-    def round(self, block, key):
+    def encryptRound(self, block, key):
         """
         Serpent round
         :param block: 128 bits block
@@ -168,7 +192,31 @@ class SerpentCipher(SymmetricCipher):
             block[i:i+4] = bitarray.bitarray(result)
 
         # Linear transformation
-        block = self.linearTransformation(block)
+        # block = self.linearTransformation(block)
+
+        return block
+    
+    def decryptRound(self, block, key):
+        """
+        Serpent round
+        :param block: 128 bits block
+        :param key: 32 bits key
+        :return: 128 bits block
+        """
+        # Temporary
+        # Force key size to 128 bits
+        key = key[:128]
+
+        # Linear transformation
+        # block = self.linearTransformation(block)
+
+        # Sbox
+        for i in range(0, len(block), 4):
+            result = bin(int(block[i:i+4].to01(), 2))[2:].zfill(4)
+            block[i:i+4] = bitarray.bitarray(result)
+
+        # XOR with the key
+        block = block ^ key
 
         return block
     
@@ -203,7 +251,7 @@ class SerpentCipher(SymmetricCipher):
         """
         Split the plaintext into 128 bits blocks
         :param plaintext: plaintext
-        :return: bitarray of 128 bits blocks
+        :return: list of bitarray of 128 bits blocks
         """
 
         # Turn the plaintext into a bitarray
@@ -228,7 +276,7 @@ class SerpentCipher(SymmetricCipher):
         """
         Split the ciphertext into 128 bits blocks
         :param ciphertext: ciphertext
-        :return: bitarray of 128 bits blocks
+        :return: list of bitarray of 128 bits blocks
         """
 
         # Turn the ciphertext into a bitarray
@@ -238,6 +286,7 @@ class SerpentCipher(SymmetricCipher):
         blocks = []
         for i in range(0, len(ba), 128):
             blocks.append(ba[i:i+128])
+
 
         return blocks
 
