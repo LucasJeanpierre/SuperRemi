@@ -1,4 +1,5 @@
 import random
+import bitarray
 
 class ModularMath:
     """
@@ -73,8 +74,48 @@ class ModularMath:
             if ModularMath.is_prime(n):
                 return n
 
+
     @staticmethod
-    def circular_bit_shift_left(block, shift, direction="left", bit_size=32):
+    def bit_shift(block, shift, direction="left", bit_size=32):
+        """
+        Bit shift
+        :param block: bitarray to shift
+        :param shift: number of bits to shift
+        :param bit_size: size of the bitarray
+        :param direction: direction of the shift
+        :return: shifted bitarray
+        """
+        # bitarray to binary
+        block = int(block.to01(), 2)
+
+        result = None
+        match direction:
+            case "left":
+                shift = shift % bit_size
+                result = block << shift
+
+                # keep only the last bit_size bits
+                result = result & ((1 << bit_size) - 1)
+            case "right":
+                shift = shift % bit_size
+                result = block >> shift
+
+                # keep only the last bit_size bits
+                result = result & ((1 << bit_size) - 1)
+            case _:
+                raise ValueError("Invalid direction")
+            
+        # binary to bitarray
+        result = bitarray.bitarray(bin(result)[2:])
+
+        # padding
+        if len(result) < bit_size:
+            result = bitarray.bitarray("0" * (bit_size - len(result))) + result
+
+        return result
+
+    @staticmethod
+    def circular_bit_shift(block, shift, direction="left", bit_size=32):
         """
         Circular bit shift
         :param block: bitarray to shift
@@ -83,6 +124,10 @@ class ModularMath:
         :param direction: direction of the shift
         :return: shifted bitarray
         """
+
+        # bitarrat to binary 
+        block = int(block.to01(), 2)
+
         reuslt = None
         match direction:
             case "left":
@@ -95,4 +140,12 @@ class ModularMath:
                 result = result & ((1 << bit_size) - 1)
             case _:
                 raise ValueError("Invalid direction")
+            
+        # binary to bitarray
+        result = bitarray.bitarray(bin(result)[2:])
+
+        # padding
+        if len(result) < bit_size:
+            result = bitarray.bitarray("0" * (bit_size - len(result))) + result
+
         return result

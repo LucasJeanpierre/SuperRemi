@@ -192,7 +192,7 @@ class SerpentCipher(SymmetricCipher):
             block[i:i+4] = bitarray.bitarray(result)
 
         # Linear transformation
-        # block = self.linearTransformation(block)
+        block = self.encryptLinearTransformation(block)
 
         return block
     
@@ -208,7 +208,7 @@ class SerpentCipher(SymmetricCipher):
         key = key[:128]
 
         # Linear transformation
-        # block = self.linearTransformation(block)
+        block = self.decryptLinearTransformation(block)
 
         # Sbox
         for i in range(0, len(block), 4):
@@ -221,7 +221,7 @@ class SerpentCipher(SymmetricCipher):
         return block
     
 
-    def linearTransformation(self, block):
+    def encryptLinearTransformation(self, block):
         """
         Serpent linear transformation
         :param block: 128 bits block
@@ -232,6 +232,53 @@ class SerpentCipher(SymmetricCipher):
         blocks = []
         for i in range(0, len(block), 32):
             blocks.append(block[i:i+32])
+
+        X0 = blocks[0]
+        X1 = blocks[1]
+        X2 = blocks[2]
+        X3 = blocks[3]
+
+        X0 = ModularMath.circular_bit_shift(X0, 13, direction="left", bit_size=32)
+        X2 = ModularMath.circular_bit_shift(X2, 3, direction="left", bit_size=32)
+        X1 = X1 ^ X0 ^ X2
+        X3 = X3 ^ X2 ^ ModularMath.bit_shift(X0, 3, direction="left", bit_size=32)
+        X1 = ModularMath.circular_bit_shift(X1, 1, direction="left", bit_size=32)
+        X3 = ModularMath.circular_bit_shift(X3, 7, direction="left", bit_size=32)
+        X0 = X0 ^ X1 ^ X3
+        X2 = X2 ^ X3 ^ ModularMath.bit_shift(X1, 7, direction="left", bit_size=32)
+        X0 = ModularMath.circular_bit_shift(X0, 5, direction="left", bit_size=32)
+        X2 = ModularMath.circular_bit_shift(X2, 22, direction="left", bit_size=32)
+
+        blocks[0] = X0
+        blocks[1] = X1
+        blocks[2] = X2
+        blocks[3] = X3
+
+        result = bitarray.bitarray(blocks[0].to01() + blocks[1].to01() + blocks[2].to01() + blocks[3].to01())
+        
+        return result
+    
+    def decryptLinearTransformation(self, block):
+        """
+        Serpent linear transformation
+        :param block: 128 bits block
+        :return: 128 bits block
+        """
+        
+        # Split the block into 4 32 bits blocks
+        blocks = []
+        for i in range(0, len(block), 32):
+            blocks.append(block[i:i+32])
+
+        X0 = blocks[0]
+        X1 = blocks[1]
+        X2 = blocks[2]
+        X3 = blocks[3]
+
+        X2 = ModularMath.circular_bit_shift(X2, 22, direction="right", bit_size=32)
+        X0 = ModularMath.circular_bit_shift(X0, 5, direction="right", bit_size=32)
+
+
 
         return block
         

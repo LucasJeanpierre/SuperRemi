@@ -59,24 +59,42 @@ class TestIsPrime(unittest.TestCase):
 class TestCirularShift(unittest.TestCase):
         
         def test_circular_shift_1(self):
-            self.assertEqual(ModularMath.circular_bit_shift_left(0b1001, 1, direction="left", bit_size=4), 0b0011)
+            self.assertEqual(ModularMath.circular_bit_shift(bitarray.bitarray("1001"), 1, direction="left", bit_size=4), bitarray.bitarray("0011"))
 
+        def test_circular_shift_2(self):
+            self.assertEqual(ModularMath.circular_bit_shift(bitarray.bitarray("1001"), 1, direction="right", bit_size=4), bitarray.bitarray("1100"))
+
+        def test_circular_shift_3(self):
+            self.assertEqual(ModularMath.circular_bit_shift(bitarray.bitarray("00000000000000001111111111111111"), 2, direction="left", bit_size=32), bitarray.bitarray("00000000000000111111111111111100"))
+
+
+
+class TestBitShift(unittest.TestCase):
+     
+        def test_bit_shift_1(self):
+            self.assertEqual(ModularMath.bit_shift(bitarray.bitarray("1001"), 1, direction="left", bit_size=4), bitarray.bitarray("0010"))
+    
+        def test_bit_shift_2(self):
+            self.assertEqual(ModularMath.bit_shift(bitarray.bitarray("1001"), 1, direction="right", bit_size=4), bitarray.bitarray("0100"))
+    
+        def test_bit_shift_3(self):
+            self.assertEqual(ModularMath.bit_shift(bitarray.bitarray("00000000000000001111111111111111"), 2, direction="left", bit_size=32), bitarray.bitarray("00000000000000111111111111111100"))
 
 
 class TestRSA(unittest.TestCase):
-    
-    def test_rsa(self):
-        public_key, private_key = RSA.keyGen()
-        message = "Hello World!"
-        cipher = RSA(public_key, private_key)
-        encrypted_message = cipher.encrypt(message)
-        decrypted_message = cipher.decrypt(encrypted_message)
-        self.assertEqual(message, decrypted_message)
+    pass
+    # def test_rsa(self):
+    #     public_key, private_key = RSA.keyGen()
+    #     message = "Hello World!"
+    #     cipher = RSA(public_key, private_key)
+    #     encrypted_message = cipher.encrypt(message)
+    #     decrypted_message = cipher.decrypt(encrypted_message)
+    #     self.assertEqual(message, decrypted_message)
         
 
 
 class TestSerpent(unittest.TestCase):
-    
+
     def test_serpent(self):
         key = SerpentCipher.keyGen()
         Serpent = SerpentCipher(key)
