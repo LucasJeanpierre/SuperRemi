@@ -381,7 +381,6 @@ class SerpentCipher(SymmetricCipher):
                     _temp = current_sbox[index_box][index_bit]
                     current_sbox[index_box][index_bit] = current_sbox[index_box][b]
                     current_sbox[index_box][b] = _temp
-        print(SBox[31])
         return SBox
     
 
@@ -489,6 +488,22 @@ class RSA(AsymmetricCipher):
         plaintext = pow(ciphertext, self.private_key[1], self.private_key[0])
         plaintext = str(libnum.n2s(plaintext))[2:-1]
         return plaintext
+    
+    def sign(self, message):
+        """
+        RSA signature
+        """
+        message = libnum.s2n(message)
+        signature = pow(message, self.private_key[1], self.private_key[0])
+        return signature
+    
+    def verify(self, message, signature):
+        """
+        RSA verification
+        """
+        message = libnum.s2n(message)
+        signature = int(signature)
+        return message == pow(signature, self.public_key[1], self.public_key[0])
 
         
         

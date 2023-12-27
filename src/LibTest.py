@@ -85,19 +85,35 @@ class TestBitShift(unittest.TestCase):
 
 class TestRSA(unittest.TestCase):
 
-    def test_rsa(self):
+    def test_rsa_encryption(self):
         public_key, private_key = RSA.keyGen()
         cipher = RSA(public_key, private_key)
         message = "Hello World!"
         encrypted_message = cipher.encrypt(message)
         decrypted_message = cipher.decrypt(encrypted_message)
         self.assertEqual(message, decrypted_message)
+
+    def test_rsa_signing_correct(self):
+        public_key, private_key = RSA.keyGen()
+        cipher = RSA(public_key, private_key)
+        message = "Hello World!"
+        signature = cipher.sign(message)
+        self.assertEqual(cipher.verify(message, signature), True)
+
+    def test_rsa_signing_incorrect(self):
+        public_key, private_key = RSA.keyGen()
+        cipher = RSA(public_key, private_key)
+        message = "Hello World!"
+        signature = cipher.sign(message)
+        public_key2, private_key2 = RSA.keyGen()
+        cipher2 = RSA(public_key2, private_key2)
+        self.assertEqual(cipher2.verify("Hello World", signature), False)
         
 
 
 class TestSerpent(unittest.TestCase):
 
-    def test_serpent(self):
+    def test_serpent_encryption(self):
         key = SerpentCipher.keyGen()
         Serpent = SerpentCipher(key)
         message = "Hello World!"
