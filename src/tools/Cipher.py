@@ -38,9 +38,9 @@ class AsymmetricCipher(Cipher):
     Asymmetric Cipher class
     """
 
-    def __init__(self, private_key, public_key):
-        self.private_key = private_key
+    def __init__(self, public_key, private_key):
         self.public_key = public_key
+        self.private_key = private_key
 
 
 
@@ -464,8 +464,6 @@ class RSA(AsymmetricCipher):
         """
         p = ModularMath.generate_prime_number(1024)
         q = ModularMath.generate_prime_number(1024)
-        logging.debug("p = %d", p)
-        logging.debug("q = %d", q)
         n = p * q
         phi = (p - 1) * (q - 1)
         e = 65537
