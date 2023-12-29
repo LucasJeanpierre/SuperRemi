@@ -5,7 +5,7 @@ import logging
 import json
 
 
-DEBUG = True
+DEBUG = False
 
 logo = [
 "   _____                       _____                _ ",
@@ -30,9 +30,22 @@ Instructions = [
     "->10<- Quitter",
 ]
 
+
+def chooseUser():
+    print("Liste des utilisateurs:")
+    for user in public_keys:
+        print(user)
+    username = input("Nom d'utilisateur: ")
+    if username not in public_keys:
+        print("Utilisateur inconnu")
+        user = None
+    user = username
+    return user
+
 if __name__ == "__main__":
     
     if not DEBUG:
+        # Get keys from src/tools/keys/public.json and src/tools/keys/private.json
         try:
             with open("src/tools/keys/public.json", "r") as f:
                 public_keys = json.load(f)
@@ -44,6 +57,12 @@ if __name__ == "__main__":
         
         current_user = None
 
+        # Get Certificate Authority from src/tools/keys/authority.json
+        with open("src/tools/keys/authority.json", "r") as f:
+            authority_keys = json.load(f)
+        certificateAuthority = CertificateAuthority(authority_keys['public'], authority_keys['private'])
+
+        # Print logo
         for line in logo:
             print(line)
         logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
@@ -89,24 +108,24 @@ if __name__ == "__main__":
                         print("Veuillez choisir un utilisateur")
                         continue
                         
-                    rsa = RSA(None, private_keys[current_user])
-                    message = input("Message: ")
-                    signature = rsa.sign(message)
-                    print(signature)
+                    certificate = certificateAuthority.create_certificate(public_keys[current_user], current_user)
+                    print(f"Certificat de {current_user}: {certificate}")
+
 
                 case "5":
-                    user = input("Utilisateur à vérifier: ")
+                    user = chooseUser()
                     if user not in public_keys:
                         print("Utilisateur inconnu")
                         continue
 
-                    rsa = RSA(public_keys[user], None)
-                    message = input("Message: ")
-                    signature = input("Signature: ")
-                    if rsa.verify(message, signature):
-                        print("Signature valide")
-                    else:
-                        print("Signature invalide")
+                    # Get certificate from src/tools/keys/certificates.json
+                    with open("src/tools/keys/certificates.json", "r") as f:
+                        certificates = json.load(f)
+                    certificate = certificates[user]
+
+                    validity = certificateAuthority.verify_certificate(certificate)
+
+                    print(f"Certificat de {user} valide: {validity}")
 
                 case "6":
                     print("Enregistrer un document dans un coffre fort")
@@ -118,14 +137,7 @@ if __name__ == "__main__":
                     print("Demander un preuve de connaissance")
 
                 case "9":
-                    print("Liste des utilisateurs:")
-                    for user in public_keys:
-                        print(user)
-                    username = input("Nom d'utilisateur: ")
-                    if username not in public_keys:
-                        print("Utilisateur inconnu")
-                        continue
-                    current_user = username
+                    current_user = chooseUser()
 
                 case "10":
                     print("Quitter")
@@ -140,26 +152,10 @@ if __name__ == "__main__":
 
         Authority = CertificateAuthority(authority_keys['public'], authority_keys['private'])
 
-        keys = RSA.keyGen()
-
-        Authority2 = CertificateAuthority(keys[0], keys[1])
-
         Company = RSA.keyGen()
 
         # Create a certificate for the company
-        CompanyCertificate = Authority.create_certificate(Company[0], "UTT")
+        CompanyCertificate = Authority.create_certificate(Company[0], "Alice")
 
-        WrongCompanyCertificate = Authority2.create_certificate(Company[0], "UTT")
-
-        
-        print(CompanyCertificate)
-
-
-        # Verify the certificate
-        print(Authority.verify_certificate(CompanyCertificate))
-        print(Authority.verify_certificate(WrongCompanyCertificate))
-
-
-
-
+    
 
