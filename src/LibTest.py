@@ -2,6 +2,7 @@ import unittest
 import bitarray
 from tools.ModularMath import ModularMath
 from tools.Cipher import RSA, SerpentCipher
+from tools.Hash import sha256
 
 class TestGCD(unittest.TestCase):
 
@@ -120,6 +121,15 @@ class TestSerpent(unittest.TestCase):
         encrypted_message = Serpent.encrypt(message)
         decrypted_message = Serpent.decrypt(encrypted_message)
         self.assertEqual(message, decrypted_message)
+
+
+class TestHash(unittest.TestCase):
+
+    def test_sha256_1(self):
+        self.assertEqual(sha256(b"admin"), "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918")
+
+    def test_sha256_1(self):
+        self.assertEqual(sha256(b"gs15"), "d56a96741074dbb41a112252750dedaab23dcb0840e23c1eaebb902472f9b3d8")
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,5 @@
 import bitarray
 from tools.ModularMath import ModularMath
-import logging
 import libnum
 import random
 

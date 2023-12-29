@@ -1,9 +1,10 @@
 from tools.Cipher import *
+from tools.Hash import *
 import logging
 import json
 
 
-DEBUG = False
+DEBUG = True
 
 logo = [
 "   _____                       _____                _ ",
@@ -132,14 +133,8 @@ if __name__ == "__main__":
                 case _:
                     print("Commande non reconnue")
     else:
-        message = "Hello World"
-        keys = RSA.keyGen()
-        public_key = keys[0]
-        private_key = keys[1]
-        cipher = RSA(keys[0], keys[1])
-        signature = cipher.sign(message)
-
-        verify_cipher = RSA(public_key, None)
-        print(verify_cipher.verify(message, signature))
+        message = b'admin'
+        hashed = sha256(message)
+        print("SHA-256 Hash:", hashed)
 
 
