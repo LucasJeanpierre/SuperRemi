@@ -1,6 +1,5 @@
 import bitarray
 from tools.ModularMath import ModularMath
-import logging
 import libnum
 import random
 
@@ -38,9 +37,9 @@ class AsymmetricCipher(Cipher):
     Asymmetric Cipher class
     """
 
-    def __init__(self, private_key, public_key):
-        self.private_key = private_key
+    def __init__(self, public_key, private_key):
         self.public_key = public_key
+        self.private_key = private_key
 
 
 
@@ -381,7 +380,6 @@ class SerpentCipher(SymmetricCipher):
                     _temp = current_sbox[index_box][index_bit]
                     current_sbox[index_box][index_bit] = current_sbox[index_box][b]
                     current_sbox[index_box][b] = _temp
-        print(SBox[31])
         return SBox
     
 
@@ -465,8 +463,6 @@ class RSA(AsymmetricCipher):
         """
         p = ModularMath.generate_prime_number(1024)
         q = ModularMath.generate_prime_number(1024)
-        logging.debug("p = %d", p)
-        logging.debug("q = %d", q)
         n = p * q
         phi = (p - 1) * (q - 1)
         e = 65537
@@ -489,6 +485,22 @@ class RSA(AsymmetricCipher):
         plaintext = pow(ciphertext, self.private_key[1], self.private_key[0])
         plaintext = str(libnum.n2s(plaintext))[2:-1]
         return plaintext
+    
+    def sign(self, message):
+        """
+        RSA signature
+        """
+        message = libnum.s2n(message)
+        signature = pow(message, self.private_key[1], self.private_key[0])
+        return signature
+    
+    def verify(self, message, signature):
+        """
+        RSA verification
+        """
+        message = libnum.s2n(message)
+        signature = int(signature)
+        return message == pow(signature, self.public_key[1], self.public_key[0])
 
         
         

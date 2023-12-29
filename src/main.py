@@ -1,4 +1,6 @@
 from tools.Cipher import *
+from tools.Hash import *
+from tools.CertificateAuthority import *
 import logging
 import json
 
@@ -24,26 +26,23 @@ Instructions = [
     "->6<- Enregistrer un document dans un coffre fort",
     "->7<- Envoyer un message (asychrone)",
     "->8<- Demander un preuvce de connaissance",
-    "->9<- Quitter",
+    "->9<- Utiliser un utilisateur",
+    "->10<- Quitter",
 ]
 
 if __name__ == "__main__":
     
     if not DEBUG:
-        with open("keys.json", "r") as f:
-            try:
-                keys = json.load(f)
-                public_key = keys["public_key"]
-                private_key = keys["private_key"]
-                secret_key = keys["secret_key"]
-                logging.info("keys loaded from keys.json")
-            except:
-                public_key = None
-                private_key = None
-                secret_key = None
-
-        print(public_key, private_key)
-
+        try:
+            with open("src/tools/keys/public.json", "r") as f:
+                public_keys = json.load(f)
+            with open("src/tools/keys/private.json", "r") as f:
+                private_keys = json.load(f)
+        except:
+            public_keys = {}
+            private_keys = {}
+        
+        current_user = None
 
         for line in logo:
             print(line)
@@ -51,6 +50,9 @@ if __name__ == "__main__":
         logging.info("Application started")
 
         while True:
+            if current_user:
+                print(f'User: {current_user}')
+
             for line in Instructions:
                 print(line)
             choice = input("> ")
@@ -58,42 +60,53 @@ if __name__ == "__main__":
             match choice:
                 case "1":
                     print("Chiffrer un message")
-                    if public_key is None:
-                        print("Veuillez générer une paire de clés")
-                        continue
-                    message = input("Message: ")
-                    cipher = RSA(public_key, private_key)
-                    encrypted_message = cipher.encrypt(message)
-                    print("Message chiffré: ", encrypted_message)
 
                 case "2":
                     print("Déchiffrer un message")
-                    if private_key is None:
-                        print("Veuillez générer une paire de clés")
-                        continue
-                    message = input("Message: ")
-                    cipher = RSA(public_key, private_key)
-                    decrypted_message = cipher.decrypt(message)
-                    print("Message déchiffré: ", decrypted_message)
 
                 case "3":
-                    print("Générer un couple de clés")
+                    username = input("Nom d'utilisateur: ")
+                    if username in public_keys:
+                        print("Utilisateur déjà existant")
+                        continue
                     keys = RSA.keyGen()
-                    print("Clé publique: ", keys[0])
-                    print("Clé privée: ", keys[1])
-                    public_key = keys[0]
-                    private_key = keys[1]
+                    print(keys[0])
+                    user_public_key = {'user' : username, 'public_key' : keys[0]}
+                    user_private_key = {'user' : username, 'private_key' : keys[1]}
 
-                    with open("keys.json", "w") as f:
-                        json.dump({"public_key": public_key, "private_key": private_key, "secret_key": secret_key}, f)
+                    public_keys[username] = keys[0]
+                    private_keys[username] = keys[1]
 
-                    logging.info("keys stored for the current session and in keys.json")
+                    with open("src/tools/keys/public.json", "w") as f:
+                        json.dump(public_keys, f)
+                    with open("src/tools/keys/private.json", "w") as f:
+                        json.dump(private_keys, f)
+
+                    logging.info("keys stored in files")
 
                 case "4":
-                    print("Signer un certificat")
+                    if current_user is None:
+                        print("Veuillez choisir un utilisateur")
+                        continue
+                        
+                    rsa = RSA(None, private_keys[current_user])
+                    message = input("Message: ")
+                    signature = rsa.sign(message)
+                    print(signature)
 
                 case "5":
-                    print("Vérifier un certificat")
+                    user = input("Utilisateur à vérifier: ")
+                    if user not in public_keys:
+                        print("Utilisateur inconnu")
+                        continue
+
+                    rsa = RSA(public_keys[user], None)
+                    message = input("Message: ")
+                    signature = input("Signature: ")
+                    if rsa.verify(message, signature):
+                        print("Signature valide")
+                    else:
+                        print("Signature invalide")
 
                 case "6":
                     print("Enregistrer un document dans un coffre fort")
@@ -105,19 +118,48 @@ if __name__ == "__main__":
                     print("Demander un preuve de connaissance")
 
                 case "9":
+                    print("Liste des utilisateurs:")
+                    for user in public_keys:
+                        print(user)
+                    username = input("Nom d'utilisateur: ")
+                    if username not in public_keys:
+                        print("Utilisateur inconnu")
+                        continue
+                    current_user = username
+
+                case "10":
                     print("Quitter")
                     exit()
 
                 case _:
                     print("Commande non reconnue")
     else:
-        message = "Hello World"
-        print("plaintext: ", message)
-        key = SerpentCipher.keyGen()
-        cipher = SerpentCipher(key)
-        encrypted_message = cipher.encrypt(message)
-        print("cipher: ", encrypted_message)
-        decrypted_message = cipher.decrypt(encrypted_message)
-        print("decrypted: ", decrypted_message)
+        # Get keys from src/tools/keys/authority.json
+        with open("src/tools/keys/authority.json", "r") as f:
+            authority_keys = json.load(f)
+
+        Authority = CertificateAuthority(authority_keys['public'], authority_keys['private'])
+
+        keys = RSA.keyGen()
+
+        Authority2 = CertificateAuthority(keys[0], keys[1])
+
+        Company = RSA.keyGen()
+
+        # Create a certificate for the company
+        CompanyCertificate = Authority.create_certificate(Company[0], "UTT")
+
+        WrongCompanyCertificate = Authority2.create_certificate(Company[0], "UTT")
+
+        
+        print(CompanyCertificate)
+
+
+        # Verify the certificate
+        print(Authority.verify_certificate(CompanyCertificate))
+        print(Authority.verify_certificate(WrongCompanyCertificate))
+
+
+
 
 
