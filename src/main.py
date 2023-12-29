@@ -1,5 +1,6 @@
 from tools.Cipher import *
 from tools.Hash import *
+from tools.CertificateAuthority import *
 import logging
 import json
 
@@ -133,8 +134,32 @@ if __name__ == "__main__":
                 case _:
                     print("Commande non reconnue")
     else:
-        message = b'admin'
-        hashed = sha256(message)
-        print("SHA-256 Hash:", hashed)
+        # Get keys from src/tools/keys/authority.json
+        with open("src/tools/keys/authority.json", "r") as f:
+            authority_keys = json.load(f)
+
+        Authority = CertificateAuthority(authority_keys['public'], authority_keys['private'])
+
+        keys = RSA.keyGen()
+
+        Authority2 = CertificateAuthority(keys[0], keys[1])
+
+        Company = RSA.keyGen()
+
+        # Create a certificate for the company
+        CompanyCertificate = Authority.create_certificate(Company[0], "UTT")
+
+        WrongCompanyCertificate = Authority2.create_certificate(Company[0], "UTT")
+
+        
+        print(CompanyCertificate)
+
+
+        # Verify the certificate
+        print(Authority.verify_certificate(CompanyCertificate))
+        print(Authority.verify_certificate(WrongCompanyCertificate))
+
+
+
 
 

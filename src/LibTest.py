@@ -3,6 +3,8 @@ import bitarray
 from tools.ModularMath import ModularMath
 from tools.Cipher import RSA, SerpentCipher
 from tools.Hash import sha256
+from tools.CertificateAuthority import CertificateAuthority
+import json
 
 class TestGCD(unittest.TestCase):
 
@@ -130,6 +132,27 @@ class TestHash(unittest.TestCase):
 
     def test_sha256_1(self):
         self.assertEqual(sha256(b"gs15"), "d56a96741074dbb41a112252750dedaab23dcb0840e23c1eaebb902472f9b3d8")
+
+
+class TestCertificateAuthority(unittest.TestCase):
+
+    def test_certificate_authority(self):
+        # Get keys from src/tools/keys/authority.json
+        with open("src/tools/keys/authority.json", "r") as f:
+            authority_keys = json.load(f)
+
+        Authority = CertificateAuthority(authority_keys['public'], authority_keys['private'])
+
+        keys = RSA.keyGen()
+        WrongAuthority = CertificateAuthority(keys[0], keys[1])
+
+        Company = RSA.keyGen()
+
+        CompanyCertificate = Authority.create_certificate(Company[0], "UTT")
+        WrongCompanyCertificate = WrongAuthority.create_certificate(Company[0], "UTT")
+
+        self.assertEqual(Authority.verify_certificate(CompanyCertificate), True)
+        self.assertEqual(Authority.verify_certificate(WrongCompanyCertificate), False)
 
 if __name__ == "__main__":
     unittest.main()
