@@ -53,3 +53,13 @@ class CertificateAuthority:
         is_valid_signature = libnum.n2s(pow(signature, self.public_key[1], self.public_key[0])) == hashed_data.encode()
 
         return is_valid_signature
+    
+    @staticmethod
+    def getAuthority():
+        # Get Certificate Authority from src/tools/keys/authority.json
+        try:
+            with open("src/tools/keys/authority.json", "r") as f:
+                authority_keys = json.load(f)
+            return CertificateAuthority(authority_keys['public'], authority_keys['private'])
+        except:
+            raise ValueError("No authority found")

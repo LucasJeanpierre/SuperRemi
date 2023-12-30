@@ -16,7 +16,7 @@ class User():
             raise ValueError("User not found")
 
     def __str__(self):
-        return f'User: {self.username}'
+        return f'{self.username}'
 
     def getPublicKey(self):
         return self.public_key
@@ -26,6 +26,19 @@ class User():
 
     def getUsername(self):
         return self.username
+    
+    def getCertificate(self):
+        # Get certificate from src/tools/keys/certificates.json
+        try:
+            with open("src/tools/keys/certificates.json", "r") as f:
+                certificates = json.load(f)
+        except:
+            raise ValueError("No certificate found")
+        
+        if self.username not in certificates:
+            raise ValueError("No certificate found")
+        
+        return certificates[self.username]
     
     @staticmethod
     def create_user(username: str, keys=None):
@@ -87,3 +100,22 @@ class User():
             json.dump(public_keys, f)
         with open("src/tools/keys/private.json", "w") as f:
             json.dump(private_keys, f)
+
+    @staticmethod
+    def users_list():
+        """
+        Lists all users
+        :return: None
+        """
+        # Get keys from src/tools/keys/public.json and src/tools/keys/
+        try:
+            with open("src/tools/keys/public.json", "r") as f:
+                public_keys = json.load(f)
+        except:
+            raise ValueError("No keys found")
+
+        users = []
+        for user in public_keys:
+            users.append(user)
+
+        return users

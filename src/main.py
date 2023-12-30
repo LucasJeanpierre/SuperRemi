@@ -1,11 +1,13 @@
 from tools.Cipher import *
 from tools.Hash import *
 from tools.CertificateAuthority import *
+from tools.User import *
 import logging
 import json
 
 
 DEBUG = False
+CUSTOM = True
 
 logo = [
 "   _____                       _____                _ ",
@@ -18,16 +20,25 @@ logo = [
 "              |_|                                     ",]
 
 Instructions = [
-    "->1<- Chiffrer un message (asymétrique)",
-    "->2<- Déchiffrer un message (asymétrique)",
-    "->3<- Générer un couple de clés",
-    "->4<- Signer un certificat",
-    "->5<- Vérifier un certificat",
-    "->6<- Enregistrer un document dans un coffre fort",
-    "->7<- Envoyer un message (asychrone)",
-    "->8<- Demander un preuvce de connaissance",
-    "->9<- Utiliser un utilisateur",
-    "->10<- Quitter",
+    "->1<- Chiffrer/Déchiffrer un message",
+    "->2<- Générer un couple de clés",
+    "->3<- Signer un certificat",
+    "->4<- Vérifier un certificat",
+    "->5<- Enregistrer un document dans un coffre fort",
+    "->6<- Envoyer un message (asychrone)",
+    "->7<- Demander un preuve de connaissance",
+    "->8<- Quitter",
+]
+
+Custom_Instructions = [
+    "->1<- Create user",
+    "->2<- Delete user",
+    "->3<- Select user",
+    "->4<- Send message",
+    "->5<- Receive message",
+    "->6<- Create certificate",
+    "->7<- Verify certificate",
+    "->8<- Exit",
 ]
 
 
@@ -42,8 +53,8 @@ def chooseUser():
     user = username
     return user
 
-if __name__ == "__main__":
-    
+
+def instructionHandler():
     if not DEBUG:
         # Get keys from src/tools/keys/public.json and src/tools/keys/private.json
         try:
@@ -157,5 +168,93 @@ if __name__ == "__main__":
         # Create a certificate for the company
         CompanyCertificate = Authority.create_certificate(Company[0], "Alice")
 
+
+if __name__ == "__main__":
+    if CUSTOM == False:
+        instructionHandler()
+    else:
+        current_user = None
+        while True:
+
+            print("-"*25)
+
+            if current_user:
+                print(f'User: {current_user}')
+            
+            for line in Custom_Instructions:
+                print(line)
+            choice = input("> ")
+
+            match choice:
+                case "1":
+                    print("Create user")
+                    username = input("Username > ")
+                    try:
+                        User.create_user(username)
+                    except ValueError as e:
+                        print(e)
+                        continue
+
+                case "2":
+                    print("Delete user")
+                    [print(user) for user in User.users_list()]
+                    username = input("Username > ")
+                    try:
+                        User.delete_user(username)
+                    except ValueError as e:
+                        print(e)
+                        continue
+
+                case "3":
+                    print("Select user")
+                    print("List :")
+                    [print(user) for user in User.users_list()]
+                    username = input("> ")
+                    if username not in User.users_list():
+                        print("Unknown user")
+                        continue
+                    current_user = User(username)
+
+                case "4":
+                    print("Send message")
+
+                case "5":
+                    print("Receive message")
+
+                case "6":
+                    print("Create certificate")
+                    if current_user is None:
+                        print("Please select a user")
+                        continue
+                        
+                    certificateAuthority = CertificateAuthority.getAuthority()
+                    certificate = certificateAuthority.create_certificate(current_user.getPublicKey(), current_user.getUsername())
+                    print(f"Certificat de {current_user}: {certificate}")
+
+                case "7":
+                    print("Verify certificate")
+                    print("List :")
+                    [print(user) for user in User.users_list()]
+                    username = input("> ")
+
+                    if username not in User.users_list():
+                        print("Unknown user")
+                        continue
+
+                    user = User(username)
+                    certificate = user.getCertificate()
+
+                    certificateAuthority = CertificateAuthority.getAuthority()
+                    validity = certificateAuthority.verify_certificate(certificate)
+
+                    print(f"Certificat de {user.getUsername()} valide: {validity}")
+
+
+
+                case "8":
+                    print("Exit")
+                    exit()
+
+   
     
 
