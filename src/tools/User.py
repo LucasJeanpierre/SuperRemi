@@ -1,5 +1,6 @@
 from tools.Cipher import RSA
 import json
+import time
 
 class User():
 
@@ -39,6 +40,69 @@ class User():
             raise ValueError("No certificate found")
         
         return certificates[self.username]
+    
+    def send_message(self, message, recipient_name):
+        """
+        Sends a message to a recipient
+        :param message: The message to be sent
+        :param recipient: The recipient of the message
+        :return: None
+        """
+
+        cipher = RSA(self.public_key, self.private_key)
+        encrypted_message = cipher.encrypt(message, key="Private")
+        recipient = User(recipient_name)
+        recipient.receive_message(encrypted_message, self.username)
+        
+        return True
+        
+
+    def receive_message(self, message, sender):
+        # Save the message in src/tools/messagesbox/username.json
+        try:
+            with open(f"src/tools/messagesbox/{self.username}.json", "r") as f:
+                messages = json.load(f)
+        except:
+            messages = {}
+        id = f"{len(messages)+1}"
+        content = {
+            "sender": sender,
+            "time": time.time(),
+            "message": message
+        }
+        messages[id] = content
+        with open(f"src/tools/messagesbox/{self.username}.json", "w+") as f:
+            json.dump(messages, f)
+
+        return True
+    
+    def get_messages(self):
+        # Get messages from src/tools/messagesbox/username.json
+        try:
+            with open(f"src/tools/messagesbox/{self.username}.json", "r") as f:
+                messages = json.load(f)
+        except:
+            messages = {}
+        
+        for message_id in messages:
+            message = messages[message_id]['message']
+            sender = User(messages[message_id]['sender'])
+            sent_time = messages[message_id]['time']
+            
+
+            cipher = RSA(sender.getPublicKey(), None)
+            message = cipher.decrypt(message, key="Public")
+
+            # Time format : 2021-03-31 15:00:00
+            sent_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(sent_time))
+            
+            messages[message_id]['message'] = message
+            messages[message_id]['sender'] = sender
+            messages[message_id]['time'] = sent_time
+
+        return messages
+        
+
     
     @staticmethod
     def create_user(username: str, keys=None):

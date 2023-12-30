@@ -97,6 +97,14 @@ class TestRSA(unittest.TestCase):
         decrypted_message = cipher.decrypt(encrypted_message)
         self.assertEqual(message, decrypted_message)
 
+    def test_rsa_encryption_2(self):
+        public_key, private_key = RSA.keyGen()
+        cipher = RSA(public_key, private_key)
+        message = "Hello World!"
+        encrypted_message = cipher.encrypt(message, key="Private")
+        decrypted_message = cipher.decrypt(encrypted_message, key="Public")
+        self.assertEqual(message, decrypted_message)
+
     def test_rsa_signing_correct(self):
         public_key, private_key = RSA.keyGen()
         cipher = RSA(public_key, private_key)

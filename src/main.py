@@ -35,7 +35,7 @@ Custom_Instructions = [
     "->2<- Delete user",
     "->3<- Select user",
     "->4<- Send message",
-    "->5<- Receive message",
+    "->5<- Read message",
     "->6<- Create certificate",
     "->7<- Verify certificate",
     "->8<- Exit",
@@ -43,6 +43,7 @@ Custom_Instructions = [
 
 
 def chooseUser():
+    public_keys = User.users_list()
     print("Liste des utilisateurs:")
     for user in public_keys:
         print(user)
@@ -217,9 +218,38 @@ if __name__ == "__main__":
 
                 case "4":
                     print("Send message")
+                    if current_user is None:
+                        print("Please select a user")
+                        continue
+                        
+                    print("List :")
+                    [print(user) for user in User.users_list()]
+                    username = input("User > ")
+
+                    if username not in User.users_list():
+                        print("Unknown user")
+                        continue
+
+                    message = input("Message > ")
+
+                    current_user.send_message(message, username)
+                    
+                    
 
                 case "5":
-                    print("Receive message")
+                    print("Read message")
+                    if current_user is None:
+                        print("Please select a user")
+                        continue
+
+                    messages = current_user.get_messages()
+                    print("Messages :")
+                    for id, message in messages.items():
+                        print(f"id : {id}")
+                        print(f"sender : {message['sender']}")
+                        print(f"time : {message['time']}")
+                        print(f"message : {message['message']}")
+                        print("")
 
                 case "6":
                     print("Create certificate")
@@ -248,7 +278,6 @@ if __name__ == "__main__":
                     validity = certificateAuthority.verify_certificate(certificate)
 
                     print(f"Certificat de {user.getUsername()} valide: {validity}")
-
 
 
                 case "8":
