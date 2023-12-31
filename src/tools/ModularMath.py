@@ -128,7 +128,6 @@ class ModularMath:
         # bitarrat to binary 
         block = int(block.to01(), 2)
 
-        reuslt = None
         match direction:
             case "left":
                 shift = shift % bit_size

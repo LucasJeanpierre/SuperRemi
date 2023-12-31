@@ -4,6 +4,7 @@ from tools.ModularMath import ModularMath
 from tools.Cipher import RSA, SerpentCipher
 from tools.Hash import sha256
 from tools.CertificateAuthority import CertificateAuthority
+from tools.User import User
 import json
 
 class TestGCD(unittest.TestCase):
@@ -96,6 +97,14 @@ class TestRSA(unittest.TestCase):
         decrypted_message = cipher.decrypt(encrypted_message)
         self.assertEqual(message, decrypted_message)
 
+    def test_rsa_encryption_2(self):
+        public_key, private_key = RSA.keyGen()
+        cipher = RSA(public_key, private_key)
+        message = "Hello World!"
+        encrypted_message = cipher.encrypt(message, key="Private")
+        decrypted_message = cipher.decrypt(encrypted_message, key="Public")
+        self.assertEqual(message, decrypted_message)
+
     def test_rsa_signing_correct(self):
         public_key, private_key = RSA.keyGen()
         cipher = RSA(public_key, private_key)
@@ -153,6 +162,20 @@ class TestCertificateAuthority(unittest.TestCase):
 
         self.assertEqual(Authority.verify_certificate(CompanyCertificate), True)
         self.assertEqual(Authority.verify_certificate(WrongCompanyCertificate), False)
+
+
+class TestUser(unittest.TestCase):
+
+    def test_user(self):
+        username = "test"
+        keys = RSA.keyGen()
+        User.create_user(username,keys=keys)
+        user = User(username)
+        self.assertEqual(keys[0],user.getPublicKey())
+        User.delete_user(username)
+        self.assertRaises(ValueError, User, username)
+
+
 
 if __name__ == "__main__":
     unittest.main()

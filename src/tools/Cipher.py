@@ -469,20 +469,27 @@ class RSA(AsymmetricCipher):
         d = ModularMath.mod_inverse(e, phi)
         return (n, e), (n, d)
 
-    def encrypt(self, plaintext):
+    def encrypt(self, plaintext, key="Public"):
         """
         RSA encryption
         """
         plaintext = libnum.s2n(plaintext)
-        ciphertext = pow(plaintext, self.public_key[1], self.public_key[0])
+        if key == "Public":
+            ciphertext = pow(plaintext, self.public_key[1], self.public_key[0])
+        elif key == "Private":
+            ciphertext = pow(plaintext, self.private_key[1], self.private_key[0])
         return ciphertext
 
-    def decrypt(self, ciphertext):
+    def decrypt(self, ciphertext, key="Private"):
         """
         RSA decryption
         """
         ciphertext = int(ciphertext)
-        plaintext = pow(ciphertext, self.private_key[1], self.private_key[0])
+        if key == "Private":
+            plaintext = pow(ciphertext, self.private_key[1], self.private_key[0])
+        elif key == "Public":
+            plaintext = pow(ciphertext, self.public_key[1], self.public_key[0])
+
         plaintext = str(libnum.n2s(plaintext))[2:-1]
         return plaintext
     

@@ -1,5 +1,6 @@
 import libnum
 from tools.Hash import sha256
+import json
 
 class CertificateAuthority:
     def __init__(self, public_key, private_key):
@@ -23,6 +24,17 @@ class CertificateAuthority:
             'entity_public_key': entity_public_key,
             'signature': signature
         }
+
+        # Save the certificate in src/tools/certificate.json with the other certificates
+        try:
+            with open("src/tools/keys/certificates.json", "r") as f:
+                certificates = json.load(f)
+        except:
+            certificates = {}
+        certificates[entity_name] = certificate
+        with open("src/tools/keys/certificates.json", "w") as f:
+            json.dump(certificates, f)
+
         return certificate
 
     def verify_certificate(self, certificate):
@@ -36,8 +48,18 @@ class CertificateAuthority:
 
         # Hash the certificate data
         hashed_data = sha256(certificate_data.encode())
-        
+
         # Verify the signature using the CA's public key
         is_valid_signature = libnum.n2s(pow(signature, self.public_key[1], self.public_key[0])) == hashed_data.encode()
 
         return is_valid_signature
+    
+    @staticmethod
+    def getAuthority():
+        # Get Certificate Authority from src/tools/keys/authority.json
+        try:
+            with open("src/tools/keys/authority.json", "r") as f:
+                authority_keys = json.load(f)
+            return CertificateAuthority(authority_keys['public'], authority_keys['private'])
+        except:
+            raise ValueError("No authority found")
