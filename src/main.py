@@ -234,7 +234,6 @@ if __name__ == "__main__":
 
                     current_user.send_message(message, username)
                     
-                    
 
                 case "5":
                     print("Read message")
