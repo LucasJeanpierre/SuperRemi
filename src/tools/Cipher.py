@@ -2,6 +2,7 @@ import bitarray
 from tools.ModularMath import ModularMath
 import libnum
 import random
+import copy
 
 
 class Cipher():
@@ -209,12 +210,12 @@ class SerpentCipher(SymmetricCipher):
         block = block ^ key
 
         # Sbox
-        # for i in range(0, len(block), 4):
-        #     index = i // 4
-        #     current = block[i:i+4]
-        #     result = bin(_SBox[index][int(current.to01(), 2)])
-        #     result = result[2:].zfill(4)
-        #     block[i:i+4] = bitarray.bitarray(result)
+        for i in range(0, len(block), 4):
+            index = i // 4
+            current = block[i:i+4]
+            result = bin(_SBox[index][int(current.to01(), 2)])
+            result = result[2:].zfill(4)
+            block[i:i+4] = bitarray.bitarray(result)
         
 
         # Linear transformation
@@ -235,12 +236,12 @@ class SerpentCipher(SymmetricCipher):
         block = self.decryptLinearTransformation(block)
 
         # Sbox
-        # for i in range(0, len(block), 4):
-        #     index = i // 4
-        #     current = block[i:i+4]
-        #     result = bin(_SBox[index].index(int(current.to01(), 2)))
-        #     result = result[2:].zfill(4)
-        #     block[i:i+4] = bitarray.bitarray(result)
+        for i in range(0, len(block), 4):
+            index = i // 4
+            current = block[i:i+4]
+            result = bin(_SBox[index].index(int(current.to01(), 2)))
+            result = result[2:].zfill(4)
+            block[i:i+4] = bitarray.bitarray(result)
 
         # XOR with the key
         block = block ^ key
@@ -371,9 +372,9 @@ class SerpentCipher(SymmetricCipher):
         SBox generation
         """
         SBox = [[[i for i in  range(16)] for _ in range(32)] for _ in range(32)]
-        SBox[0] = SerpentCipher.DES_SBOX
+        SBox[0] = copy.deepcopy(SerpentCipher.DES_SBOX)
         for i in range(1,32):
-            SBox[i] = SBox[i-1].copy()
+            SBox[i] = SBox[i-1]
             current_sbox = SBox[i]
             for index_box in range(32):
                 for index_bit in range(16):
@@ -382,6 +383,7 @@ class SerpentCipher(SymmetricCipher):
                     _temp = current_sbox[index_box][index_bit]
                     current_sbox[index_box][index_bit] = current_sbox[index_box][b]
                     current_sbox[index_box][b] = _temp
+
         return SBox
     
 
