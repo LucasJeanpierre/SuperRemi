@@ -1,0 +1,6 @@
+{
+    "Bob": {
+        "chain_key": "chain_key",
+        "salt": "salt"
+    }
+}

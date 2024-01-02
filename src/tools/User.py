@@ -1,4 +1,5 @@
 from tools.Cipher import RSA
+from tools.Conversation import Conversation
 import json
 import time
 
@@ -41,7 +42,7 @@ class User():
         
         return certificates[self.username]
     
-    def send_message(self, message, recipient_name):
+    def send_message_asymetric(self, message, recipient_name):
         """
         Sends a message to a recipient
         :param message: The message to be sent
@@ -52,12 +53,12 @@ class User():
         cipher = RSA(self.public_key, self.private_key)
         encrypted_message = cipher.encrypt(message, key="Private")
         recipient = User(recipient_name)
-        recipient.receive_message(encrypted_message, self.username)
+        recipient.receive_message_asymetric(encrypted_message, self.username)
         
         return True
         
 
-    def receive_message(self, message, sender):
+    def receive_message_asymetric(self, message, sender):
         # Save the message in src/tools/messagesbox/username.json
         try:
             with open(f"src/tools/messagesbox/{self.username}.json", "r") as f:
@@ -76,7 +77,7 @@ class User():
 
         return True
     
-    def get_messages(self):
+    def get_messages_asymetric(self):
         # Get messages from src/tools/messagesbox/username.json
         try:
             with open(f"src/tools/messagesbox/{self.username}.json", "r") as f:
@@ -101,6 +102,17 @@ class User():
             messages[message_id]['time'] = sent_time
 
         return messages
+        
+
+    def establish_conversation(self, other, chain_key, salt):
+        """
+        Establishes a conversation with another user
+        :param other: The other user
+        :param chain_key: The chain key
+        :param salt: The salt
+        :return: The conversation
+        """
+        self.conversation = Conversation(self.username, self, other, chain_key, salt)
         
 
     

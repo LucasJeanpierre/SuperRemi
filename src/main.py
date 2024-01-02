@@ -7,7 +7,7 @@ import logging
 import json
 
 
-DEBUG = False
+DEBUG = True
 CUSTOM = True
 
 logo = [
@@ -35,11 +35,12 @@ Custom_Instructions = [
     "->1<- Create user",
     "->2<- Delete user",
     "->3<- Select user",
-    "->4<- Send message",
-    "->5<- Read message",
+    "->4<- Send message (Asymetric)",
+    "->5<- Read message (Asymetric)",
     "->6<- Create certificate",
     "->7<- Verify certificate",
-    "->8<- Exit",
+    "->8<- Conversation (Symetric)",
+    "->9<- Exit",
 ]
 
 
@@ -175,12 +176,20 @@ if __name__ == "__main__":
     if CUSTOM == False:
         instructionHandler()
     elif DEBUG == True:
-        kdf = KDF("main_key", "salt", 256)
-        for i in range(10):
-            print(kdf.derive())
-            print(kdf)
+        Alice = User("Alice")
+        Bob = User("Bob")
+
+        chain_key = "chain_key"
+        salt = "salt"
+
+        conversation = Conversation(Alice, Bob, chain_key, salt)
     else:
         current_user = None
+
+        for line in logo:
+            print(line)
+
+
         while True:
 
             print("-"*25)
@@ -238,7 +247,7 @@ if __name__ == "__main__":
 
                     message = input("Message > ")
 
-                    current_user.send_message(message, username)
+                    current_user.send_message_asymetric(message, username)
                     
 
                 case "5":
@@ -247,7 +256,7 @@ if __name__ == "__main__":
                         print("Please select a user")
                         continue
 
-                    messages = current_user.get_messages()
+                    messages = current_user.get_messages_asymetric()
                     print("Messages :")
                     for id, message in messages.items():
                         print(f"id : {id}")
@@ -284,8 +293,11 @@ if __name__ == "__main__":
 
                     print(f"Certificat de {user.getUsername()} valide: {validity}")
 
-
                 case "8":
+                    print("Conversation")
+
+
+                case "9":
                     print("Exit")
                     exit()
 
