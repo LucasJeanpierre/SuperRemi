@@ -2,6 +2,7 @@ from tools.Cipher import *
 from tools.Hash import *
 from tools.CertificateAuthority import *
 from tools.User import *
+from tools.KDF import *
 import logging
 import json
 
@@ -173,6 +174,11 @@ def instructionHandler():
 if __name__ == "__main__":
     if CUSTOM == False:
         instructionHandler()
+    elif DEBUG == True:
+        kdf = KDF("main_key", "salt", 256)
+        for i in range(10):
+            print(kdf.derive())
+            print(kdf)
     else:
         current_user = None
         while True:

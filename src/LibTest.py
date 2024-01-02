@@ -5,6 +5,7 @@ from tools.Cipher import RSA, SerpentCipher
 from tools.Hash import sha256
 from tools.CertificateAuthority import CertificateAuthority
 from tools.User import User
+from tools.KDF import KDF
 import json
 
 class TestGCD(unittest.TestCase):
@@ -146,7 +147,6 @@ class TestHash(unittest.TestCase):
 class TestCertificateAuthority(unittest.TestCase):
 
     def test_certificate_authority(self):
-        # Get keys from src/tools/keys/authority.json
         with open("src/tools/keys/authority.json", "r") as f:
             authority_keys = json.load(f)
 
@@ -175,6 +175,22 @@ class TestUser(unittest.TestCase):
         User.delete_user(username)
         self.assertRaises(ValueError, User, username)
 
+
+class TestKDF(unittest.TestCase):
+
+    def test_kdf(self):
+        KDF_Alice = KDF("chain_key", "salt", 256)
+        KDF_Bob = KDF("chain_key", "salt", 256)
+
+        for _ in range(10):
+            serpentAlice = SerpentCipher(KDF_Alice.derive())
+            serpentBob = SerpentCipher(KDF_Bob.derive())
+
+            message = "Hello World!"
+            encrypted_message = serpentAlice.encrypt(message)
+            decrypted_message = serpentBob.decrypt(encrypted_message)
+
+            self.assertEqual(message, decrypted_message)
 
 
 if __name__ == "__main__":
