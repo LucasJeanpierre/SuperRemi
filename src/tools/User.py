@@ -19,6 +19,9 @@ class User():
 
     def __str__(self):
         return f'{self.username}'
+    
+    def setConversation(self, conversation):
+        self.conversation = conversation
 
     def getPublicKey(self):
         return self.public_key
@@ -41,6 +44,16 @@ class User():
             raise ValueError("No certificate found")
         
         return certificates[self.username]
+    
+    def send_message_conversation(self, message):
+        """
+        Sends a message to the other user
+        :param message: The message to be sent
+        :return: None
+        """
+        self.conversation.send_message(message)
+        
+        return True
     
     def send_message_asymetric(self, message, recipient_name):
         """
