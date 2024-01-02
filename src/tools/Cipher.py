@@ -118,11 +118,13 @@ class SerpentCipher(SymmetricCipher):
         ciphertext = bitarray.bitarray()
         for block in blocks:
             ciphertext.extend(self.blockInitialPermutation(block))
+
     
         # Block encryption
         for i in range(0, len(ciphertext), 128):
             block = ciphertext[i:i+128]
             ciphertext[i:i+128] = self.blockEncryption(block)
+
 
         # Final permutation
         for i in range(0, len(ciphertext), 128):
@@ -207,12 +209,12 @@ class SerpentCipher(SymmetricCipher):
         block = block ^ key
 
         # Sbox
-        for i in range(0, len(block), 4):
-            index = i // 4
-            current = block[i:i+4]
-            result = bin(_SBox[index][int(current.to01(), 2)])
-            result = result[2:].zfill(4)
-            block[i:i+4] = bitarray.bitarray(result)
+        # for i in range(0, len(block), 4):
+        #     index = i // 4
+        #     current = block[i:i+4]
+        #     result = bin(_SBox[index][int(current.to01(), 2)])
+        #     result = result[2:].zfill(4)
+        #     block[i:i+4] = bitarray.bitarray(result)
         
 
         # Linear transformation
@@ -233,12 +235,12 @@ class SerpentCipher(SymmetricCipher):
         block = self.decryptLinearTransformation(block)
 
         # Sbox
-        for i in range(0, len(block), 4):
-            index = i // 4
-            current = block[i:i+4]
-            result = bin(_SBox[index].index(int(current.to01(), 2)))
-            result = result[2:].zfill(4)
-            block[i:i+4] = bitarray.bitarray(result)
+        # for i in range(0, len(block), 4):
+        #     index = i // 4
+        #     current = block[i:i+4]
+        #     result = bin(_SBox[index].index(int(current.to01(), 2)))
+        #     result = result[2:].zfill(4)
+        #     block[i:i+4] = bitarray.bitarray(result)
 
         # XOR with the key
         block = block ^ key

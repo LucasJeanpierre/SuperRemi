@@ -192,6 +192,11 @@ if __name__ == "__main__":
         Bob.send_message_conversation("Hi Alice!")
         Bob.send_message_conversation("I'm fine, thanks!")
 
+        Alice.send_message_conversation("Good to hear that!")
+
+        print(Alice.get_messages_conversation())
+
+
 
     else:
         current_user = None

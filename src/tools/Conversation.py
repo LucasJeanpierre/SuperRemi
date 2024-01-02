@@ -17,7 +17,7 @@ class Conversation:
         try:
             with open(f"src/tools/conversations/{me.username}.json", "r") as f:
                 conversations = json.load(f)
-                
+
                 if not self.other.username in conversations:
                     conversations[self.other.username] = {
                         'chain_key': self.chain_key,
@@ -36,6 +36,14 @@ class Conversation:
             json.dump(conversations, f)
 
 
+        try:
+            self.iterations = len(conversations[self.other.username]['messages'])
+            for _ in range(self.iterations):
+                self.kfd.derive()
+        except:
+            self.iterations = 0
+
+
         # Receiver
         try:
             with open(f"src/tools/conversations/{other.username}.json", "r") as f:
@@ -46,6 +54,7 @@ class Conversation:
                         'chain_key': self.chain_key,
                         'salt': self.salt
                     }
+                
                     
         except:
             conversations = {}
@@ -53,6 +62,7 @@ class Conversation:
                 'chain_key': self.chain_key,
                 'salt': self.salt
             }
+        
         
 
         with open(f"src/tools/conversations/{other.username}.json", "w") as f:
@@ -66,14 +76,55 @@ class Conversation:
         :return: None
         """
         # Encrypt the message
+        self.kfd = KDF(self.chain_key, self.salt, 256)
+        nb_messages = Conversation.get_number_of_messages(self.me, self.other)
+        for _ in range(nb_messages):
+            self.kfd.derive()
         secret_key = self.kfd.derive()
         cipher = SerpentCipher(secret_key)
-
         encrypted_message = cipher.encrypt(message)
+        
 
         # Save the message in src/tools/conversation/{me}.json with the other messages
         Conversation.save_message_in_conversation(self.me, self.other, encrypted_message, owner=self.me)
         Conversation.save_message_in_conversation(self.me, self.other, encrypted_message, owner=self.other)
+
+        return True
+    
+    def get_messages(self):
+        """
+        Gets the messages
+        :return: The messages
+        """
+        # Get the messages from src/tools/conversation/{me}.json
+        try:
+            with open(f"src/tools/conversations/{self.me.username}.json", "r") as f:
+                conversations = json.load(f)
+
+                if not self.other.username in conversations:
+                    messages = []
+                else:
+                    try:
+                        messages = conversations[self.other.username]['messages']
+                    except:
+                        messages = []
+        except:
+            messages = []
+        
+        # Decrypt the messages
+        self.kfd = KDF(self.chain_key, self.salt, 256)
+
+        decrypted_messages = []
+        for message in messages:
+            decrypted_message = SerpentCipher(self.kfd.derive()).decrypt(message['message'])
+            decrypted_messages.append({
+                'id': message['id'],
+                'sender': message['sender'],
+                'message': decrypted_message,
+                'time': message['time']
+            })
+        
+        return decrypted_messages
 
 
     @staticmethod
@@ -119,7 +170,23 @@ class Conversation:
             json.dump(conversations, f)
         
 
-        
+    @staticmethod
+    def get_number_of_messages(me, other):
+        """
+        Gets the number of messages
+        :param me: The user
+        :param other: The other user
+        :return: The number of messages
+        """
+        # Get the messages from src/tools/conversation/{me}.json
+        try:
+            with open(f"src/tools/conversations/{me.username}.json", "r") as f:
+                conversations = json.load(f)
+            iterations = len(conversations[other.username]['messages'])
+        except:
+            iterations = 0
+
+        return iterations
 
 
     

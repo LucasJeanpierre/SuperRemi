@@ -55,6 +55,13 @@ class User():
         
         return True
     
+    def get_messages_conversation(self):
+        """
+        Gets the messages from the conversation
+        :return: The messages
+        """
+        return self.conversation.get_messages()
+    
     def send_message_asymetric(self, message, recipient_name):
         """
         Sends a message to a recipient
