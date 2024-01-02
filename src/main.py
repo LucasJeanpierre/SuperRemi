@@ -184,17 +184,17 @@ if __name__ == "__main__":
 
         alice_conversation = Conversation(Alice, Bob, chain_key, salt)
         Alice.setConversation(alice_conversation)
-        Alice.send_message_conversation("Hello Bob!")
-        Alice.send_message_conversation("How are you?")
+        #Alice.send_message_conversation("Hello Again!")
+        # Alice.send_message_conversation("How are you?")
 
         bob_conversation = Conversation(Bob, Alice, chain_key, salt)
         Bob.setConversation(bob_conversation)
-        Bob.send_message_conversation("Hi Alice!")
-        Bob.send_message_conversation("I'm fine, thanks!")
+        # Bob.send_message_conversation("Hi Alice!")
+        # Bob.send_message_conversation("I'm fine, thanks!")
 
-        Alice.send_message_conversation("Good to hear that!")
+        # Alice.send_message_conversation("Good to hear that!")
 
-        print(Alice.get_messages_conversation())
+        print(Alice.get_messages_conversation()[0]['message'])
 
 
 

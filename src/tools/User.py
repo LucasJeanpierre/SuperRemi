@@ -2,6 +2,7 @@ from tools.Cipher import RSA
 from tools.Conversation import Conversation
 import json
 import time
+import os
 
 class User():
 
@@ -196,6 +197,18 @@ class User():
             json.dump(public_keys, f)
         with open("src/tools/keys/private.json", "w") as f:
             json.dump(private_keys, f)
+
+        # Remove conversation file
+        try:
+            os.remove(f"src/tools/conversations/{username}.json")
+        except:
+            pass
+
+        # Remove messagesbox file
+        try:
+            os.remove(f"src/tools/messagesbox/{username}.json")
+        except:
+            pass
 
     @staticmethod
     def users_list():

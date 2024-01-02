@@ -6,6 +6,7 @@ from tools.Hash import sha256
 from tools.CertificateAuthority import CertificateAuthority
 from tools.User import User
 from tools.KDF import KDF
+from tools.Conversation import Conversation
 import json
 
 class TestGCD(unittest.TestCase):
@@ -192,6 +193,29 @@ class TestKDF(unittest.TestCase):
 
             self.assertEqual(message, decrypted_message)
 
+
+class TestConversation(unittest.TestCase):
+    
+        def test_conversation(self):
+            User.create_user("AliceTest")
+            User.create_user("BobTest")
+            Alice = User("AliceTest")
+            Bob = User("BobTest")
+
+            chain_key = "chain_key"
+            salt = "salt"
+
+            alice_conversation = Conversation(Alice, Bob, chain_key, salt)
+            Alice.setConversation(alice_conversation)
+            Alice.send_message_conversation("Hello World!")
+
+            bob_conversation = Conversation(Bob, Alice, chain_key, salt)
+            Bob.setConversation(bob_conversation)
+    
+            self.assertEqual(Bob.get_messages_conversation()[0]['message'], "Hello World!")
+
+            User.delete_user("AliceTest")
+            User.delete_user("BobTest")
 
 if __name__ == "__main__":
     unittest.main()
