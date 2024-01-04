@@ -2,6 +2,7 @@ import bitarray
 from tools.ModularMath import ModularMath
 import libnum
 import random
+import copy
 
 
 class Cipher():
@@ -118,11 +119,13 @@ class SerpentCipher(SymmetricCipher):
         ciphertext = bitarray.bitarray()
         for block in blocks:
             ciphertext.extend(self.blockInitialPermutation(block))
+
     
         # Block encryption
         for i in range(0, len(ciphertext), 128):
             block = ciphertext[i:i+128]
             ciphertext[i:i+128] = self.blockEncryption(block)
+
 
         # Final permutation
         for i in range(0, len(ciphertext), 128):
@@ -369,9 +372,9 @@ class SerpentCipher(SymmetricCipher):
         SBox generation
         """
         SBox = [[[i for i in  range(16)] for _ in range(32)] for _ in range(32)]
-        SBox[0] = SerpentCipher.DES_SBOX
+        SBox[0] = copy.deepcopy(SerpentCipher.DES_SBOX)
         for i in range(1,32):
-            SBox[i] = SBox[i-1].copy()
+            SBox[i] = SBox[i-1]
             current_sbox = SBox[i]
             for index_box in range(32):
                 for index_bit in range(16):
@@ -380,6 +383,7 @@ class SerpentCipher(SymmetricCipher):
                     _temp = current_sbox[index_box][index_bit]
                     current_sbox[index_box][index_bit] = current_sbox[index_box][b]
                     current_sbox[index_box][b] = _temp
+
         return SBox
     
 

@@ -5,6 +5,8 @@ from tools.Cipher import RSA, SerpentCipher
 from tools.Hash import sha256
 from tools.CertificateAuthority import CertificateAuthority
 from tools.User import User
+from tools.KDF import KDF
+from tools.Conversation import Conversation
 import json
 
 class TestGCD(unittest.TestCase):
@@ -146,7 +148,6 @@ class TestHash(unittest.TestCase):
 class TestCertificateAuthority(unittest.TestCase):
 
     def test_certificate_authority(self):
-        # Get keys from src/tools/keys/authority.json
         with open("src/tools/keys/authority.json", "r") as f:
             authority_keys = json.load(f)
 
@@ -176,6 +177,46 @@ class TestUser(unittest.TestCase):
         self.assertRaises(ValueError, User, username)
 
 
+class TestKDF(unittest.TestCase):
+
+    def test_kdf(self):
+        KDF_Alice = KDF("chain_key", "salt", 256)
+        KDF_Bob = KDF("chain_key", "salt", 256)
+
+        for _ in range(10):
+            serpentAlice = SerpentCipher(KDF_Alice.derive())
+            serpentBob = SerpentCipher(KDF_Bob.derive())
+
+            message = "Hello World!"
+            encrypted_message = serpentAlice.encrypt(message)
+            decrypted_message = serpentBob.decrypt(encrypted_message)
+
+            self.assertEqual(message, decrypted_message)
+
+
+class TestConversation(unittest.TestCase):
+    
+        def test_conversation(self):
+            User.create_user("AliceTest")
+            User.create_user("BobTest")
+            Alice = User("AliceTest")
+            Bob = User("BobTest")
+
+            chain_key = "chain_key"
+            salt = "salt"
+
+            Conversation.create_conversation(Alice, Bob, chain_key, salt)
+            alice_conversation = Conversation(Alice, Bob)
+            Alice.setConversation(alice_conversation)
+            Alice.send_message_conversation("Hello World!")
+
+            bob_conversation = Conversation(Bob, Alice)
+            Bob.setConversation(bob_conversation)
+    
+            self.assertEqual(Bob.get_messages_conversation()[0]['message'], "Hello World!")
+
+            User.delete_user("AliceTest")
+            User.delete_user("BobTest")
 
 if __name__ == "__main__":
     unittest.main()
