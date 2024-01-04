@@ -7,7 +7,7 @@ import logging
 import json
 
 
-DEBUG = False
+DEBUG = True
 CUSTOM = True
 
 logo = [
@@ -42,7 +42,8 @@ Custom_Instructions = [
     "->8<- Start Conversation (Symetric)",
     "->9<- Send message (Symetric)",
     "->10<- Read message (Symetric)",
-    "->11<- Exit",
+    "->11<- Proof of knowledge",
+    "->12<- Exit",
 ]
 
 
@@ -178,30 +179,7 @@ if __name__ == "__main__":
     if CUSTOM == False:
         instructionHandler()
     elif DEBUG == True:
-        Alice = User("Alice")
-        Bob = User("Bob")
-
-        # chain_key = "chain_key"
-        # salt = "salt"
-
-        # Conversation.create_conversation(Alice, Bob, chain_key, salt)
-
-        alice_conversation = Conversation(Alice, Bob)
-        Alice.setConversation(alice_conversation)
-        #Alice.send_message_conversation("How are you?2")
-
-    
-
-        bob_conversation = Conversation(Bob, Alice)
-        Bob.setConversation(bob_conversation)
-        Bob.send_message_conversation("Hi Alice!")
-        # Bob.send_message_conversation("I'm fine, thanks!")
-
-        # Alice.send_message_conversation("Good to hear that!")
-
-        print(Bob.get_messages_conversation())
-
-
+        print(hmac_sha256("admin".encode(), "admin".encode())) 
 
     else:
         current_user = None
@@ -386,6 +364,26 @@ if __name__ == "__main__":
                         print("")
 
                 case "11":
+                    print("Proof of knowledge")
+                    if current_user is None:
+                        print("Please select a user")
+                        continue
+
+                    print("List :")
+                    [print(user) for user in User.users_list()]
+                    username = input("> ")
+
+                    if username not in User.users_list():
+                        print("Unknown user")
+                        continue
+
+                    other = User(username)
+
+                    other_public_key = other.getPublicKey()
+
+
+
+                case "12":
                     print("Exit")
                     exit()
 

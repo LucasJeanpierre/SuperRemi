@@ -2,7 +2,7 @@ import unittest
 import bitarray
 from tools.ModularMath import ModularMath
 from tools.Cipher import RSA, SerpentCipher
-from tools.Hash import sha256
+from tools.Hash import sha256, hmac_sha256
 from tools.CertificateAuthority import CertificateAuthority
 from tools.User import User
 from tools.KDF import KDF
@@ -25,6 +25,19 @@ class TestGCD(unittest.TestCase):
 
     def test_gcd_5(self):
         self.assertEqual(ModularMath.gcd(221, 782), 17)
+
+
+class TestEulerTotient(unittest.TestCase):
+        
+            def test_euler_totient_1(self):
+                self.assertEqual(ModularMath.euler_totient(7), 6)
+        
+            def test_euler_totient_2(self):
+                self.assertEqual(ModularMath.euler_totient(10), 4)
+        
+            def test_euler_totient_3(self):
+                self.assertEqual(ModularMath.euler_totient(123456), 41088)
+        
 
 
 class TestModInverse(unittest.TestCase):
@@ -144,6 +157,11 @@ class TestHash(unittest.TestCase):
     def test_sha256_1(self):
         self.assertEqual(sha256(b"gs15"), "d56a96741074dbb41a112252750dedaab23dcb0840e23c1eaebb902472f9b3d8")
 
+    def test_hmac_sha256_1(self):
+        self.assertEqual(hmac_sha256(b"admin", b"admin"), "f429ec54f354b72bed77a5c0afedecb91f347f479a09f74f4107592764b56d1c")
+
+    def test_hmac_sha256_1(self):
+        self.assertEqual(hmac_sha256(b"admin", b"gs15"), "0af840f4ce055536ff9919d1016f880c9112f356d46a69c5f2ca4e92bfbe7f2c")
 
 class TestCertificateAuthority(unittest.TestCase):
 

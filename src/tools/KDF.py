@@ -1,4 +1,4 @@
-from tools.Hash import sha256
+from tools.Hash import hmac_sha256
 import bitarray
 import string
 import random
@@ -20,13 +20,11 @@ class KDF():
     def derive(self):
         # Message key derivation
         content = str(self.chain_key) + str(self.salt) + str(self.iteration)
-        content = content.encode()
-        message_key = sha256(content)
+        message_key = hmac_sha256(self.chain_key.encode(), content.encode())
 
         # Chain key derivation
         content = str(self.salt) + str(self.chain_key) + str(self.iteration)
-        content = content.encode()
-        self.chain_key = sha256(content)
+        self.chain_key = hmac_sha256(self.chain_key.encode(), content.encode())
 
         self.iteration += 1
 

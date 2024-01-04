@@ -3,6 +3,7 @@ from tools.Conversation import Conversation
 import json
 import time
 import os
+import random
 
 class User():
 
@@ -124,18 +125,6 @@ class User():
 
         return messages
         
-
-    def establish_conversation(self, other, chain_key, salt):
-        """
-        Establishes a conversation with another user
-        :param other: The other user
-        :param chain_key: The chain key
-        :param salt: The salt
-        :return: The conversation
-        """
-        self.conversation = Conversation(self.username, self, other, chain_key, salt)
-        
-
     
     @staticmethod
     def create_user(username: str, keys=None):
