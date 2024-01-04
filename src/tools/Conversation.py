@@ -1,4 +1,5 @@
 from tools.KDF import KDF
+from tools.Cipher import RSA
 from tools.Cipher import SerpentCipher
 import json
 import time
@@ -8,16 +9,20 @@ class Conversation:
         self.me = me
         self.other = other
         self.messages = []
-        
 
-        # Save the conversations in src/tools/conversations/*.json with the other conversations
-        # Sender
+
+        # Get the chain key, the salt and messages from src/tools/conversation/{me}.json
         try:
             with open(f"src/tools/conversations/{me.username}.json", "r") as f:
                 conversations = json.load(f)
 
                 self.chain_key = conversations[self.other.username]['chain_key']
                 self.salt = conversations[self.other.username]['salt']
+
+                private_key = me.getPrivateKey()
+                rsa = RSA(None, private_key)
+                self.chain_key = rsa.decrypt(self.chain_key, key="Private")
+                self.salt = rsa.decrypt(self.salt, key="Private")
                     
         except:
             raise Exception("No conversation with this user")
@@ -35,28 +40,43 @@ class Conversation:
 
     @staticmethod
     def create_conversation(me, other, chain_key, salt):
-         # Save the conversations in src/tools/conversations/*.json with the other conversations
+        
+        # Encrypt the chain key and the salt with the me's public key
+        me_public_key = me.getPublicKey()
+        rsa = RSA(me_public_key, None)
+        encrypted_chain_key = rsa.encrypt(chain_key, key="Public")
+        encrypted_salt = rsa.encrypt(salt, key="Public")
+
+        # Save the conversations in src/tools/conversations/*.json with the other conversations
         # Sender
         try:
             with open(f"src/tools/conversations/{me.username}.json", "r") as f:
 
+
                 if not other.username in conversations:
                     conversations[other.username] = {
-                        'chain_key': chain_key,
-                        'salt': salt
+                        'chain_key': encrypted_chain_key,
+                        'salt': encrypted_salt
                     }
                     
         except:
             conversations = {}
             conversations[other.username] = {
-                'chain_key': chain_key,
-                'salt': salt
+                'chain_key': encrypted_chain_key,
+                'salt': encrypted_salt
             }
         
 
         with open(f"src/tools/conversations/{me.username}.json", "w") as f:
             json.dump(conversations, f)
 
+
+        # Encrypt the chain key and the salt with the other user's public key
+
+        other_public_key = other.getPublicKey()
+        rsa = RSA(other_public_key, None)
+        encrypted_chain_key = rsa.encrypt(chain_key, key="Public")
+        encrypted_salt = rsa.encrypt(salt, key="Public")
 
         # Receiver
         try:
@@ -65,16 +85,16 @@ class Conversation:
 
                 if not me.username in conversations:
                     conversations[me.username] = {
-                        'chain_key': chain_key,
-                        'salt': salt
+                        'chain_key': encrypted_chain_key,
+                        'salt': encrypted_salt
                     }
                 
                     
         except:
             conversations = {}
             conversations[me.username] = {
-                'chain_key': chain_key,
-                'salt': salt
+                'chain_key': encrypted_chain_key,
+                'salt': encrypted_salt
             }
         
         

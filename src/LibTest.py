@@ -205,7 +205,6 @@ class TestConversation(unittest.TestCase):
             chain_key = "chain_key"
             salt = "salt"
 
-
             Conversation.create_conversation(Alice, Bob, chain_key, salt)
             alice_conversation = Conversation(Alice, Bob)
             Alice.setConversation(alice_conversation)

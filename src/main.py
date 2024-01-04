@@ -176,18 +176,19 @@ if __name__ == "__main__":
     if CUSTOM == False:
         instructionHandler()
     elif DEBUG == True:
-        Alice = User("AliceTest")
-        Bob = User("BobTest")
+        Alice = User("Alice")
+        Bob = User("Bob")
 
-        chain_key = "chain_key"
-        salt = "salt"
+        # chain_key = "chain_key"
+        # salt = "salt"
 
-        Conversation.create_conversation(Alice, Bob, chain_key, salt)
+        # Conversation.create_conversation(Alice, Bob, chain_key, salt)
 
         alice_conversation = Conversation(Alice, Bob)
         Alice.setConversation(alice_conversation)
-        Alice.send_message_conversation("Hello Again!")
-        #Alice.send_message_conversation("How are you?")
+        #Alice.send_message_conversation("How are you?2")
+
+    
 
         bob_conversation = Conversation(Bob, Alice)
         Bob.setConversation(bob_conversation)
@@ -196,8 +197,7 @@ if __name__ == "__main__":
 
         # Alice.send_message_conversation("Good to hear that!")
 
-        print(Alice.get_messages_conversation()[0]['message'])
-
+        print(Bob.get_messages_conversation())
 
 
 
