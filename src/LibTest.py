@@ -205,11 +205,13 @@ class TestConversation(unittest.TestCase):
             chain_key = "chain_key"
             salt = "salt"
 
-            alice_conversation = Conversation(Alice, Bob, chain_key, salt)
+
+            Conversation.create_conversation(Alice, Bob, chain_key, salt)
+            alice_conversation = Conversation(Alice, Bob)
             Alice.setConversation(alice_conversation)
             Alice.send_message_conversation("Hello World!")
 
-            bob_conversation = Conversation(Bob, Alice, chain_key, salt)
+            bob_conversation = Conversation(Bob, Alice)
             Bob.setConversation(bob_conversation)
     
             self.assertEqual(Bob.get_messages_conversation()[0]['message'], "Hello World!")

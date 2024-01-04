@@ -4,13 +4,11 @@ import json
 import time
 
 class Conversation:
-    def __init__(self, me, other, chain_key, salt):
+    def __init__(self, me, other):
         self.me = me
         self.other = other
-        self.chain_key = chain_key
-        self.salt = salt
         self.messages = []
-        self.kfd = KDF(self.chain_key, self.salt, 256)
+        
 
         # Save the conversations in src/tools/conversations/*.json with the other conversations
         # Sender
@@ -18,23 +16,13 @@ class Conversation:
             with open(f"src/tools/conversations/{me.username}.json", "r") as f:
                 conversations = json.load(f)
 
-                if not self.other.username in conversations:
-                    conversations[self.other.username] = {
-                        'chain_key': self.chain_key,
-                        'salt': self.salt
-                    }
+                self.chain_key = conversations[self.other.username]['chain_key']
+                self.salt = conversations[self.other.username]['salt']
                     
         except:
-            conversations = {}
-            conversations[self.other.username] = {
-                'chain_key': self.chain_key,
-                'salt': self.salt
-            }
+            raise Exception("No conversation with this user")
         
-
-        with open(f"src/tools/conversations/{me.username}.json", "w") as f:
-            json.dump(conversations, f)
-
+        self.kfd = KDF(self.chain_key, self.salt, 256)
 
         try:
             self.iterations = len(conversations[self.other.username]['messages'])
@@ -44,23 +32,49 @@ class Conversation:
             self.iterations = 0
 
 
+
+    @staticmethod
+    def create_conversation(me, other, chain_key, salt):
+         # Save the conversations in src/tools/conversations/*.json with the other conversations
+        # Sender
+        try:
+            with open(f"src/tools/conversations/{me.username}.json", "r") as f:
+
+                if not other.username in conversations:
+                    conversations[other.username] = {
+                        'chain_key': chain_key,
+                        'salt': salt
+                    }
+                    
+        except:
+            conversations = {}
+            conversations[other.username] = {
+                'chain_key': chain_key,
+                'salt': salt
+            }
+        
+
+        with open(f"src/tools/conversations/{me.username}.json", "w") as f:
+            json.dump(conversations, f)
+
+
         # Receiver
         try:
             with open(f"src/tools/conversations/{other.username}.json", "r") as f:
                 conversations = json.load(f)
 
-                if not self.me.username in conversations:
-                    conversations[self.me.username] = {
-                        'chain_key': self.chain_key,
-                        'salt': self.salt
+                if not me.username in conversations:
+                    conversations[me.username] = {
+                        'chain_key': chain_key,
+                        'salt': salt
                     }
                 
                     
         except:
             conversations = {}
-            conversations[self.me.username] = {
-                'chain_key': self.chain_key,
-                'salt': self.salt
+            conversations[me.username] = {
+                'chain_key': chain_key,
+                'salt': salt
             }
         
         
