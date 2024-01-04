@@ -7,7 +7,7 @@ import logging
 import json
 
 
-DEBUG = True
+DEBUG = False
 CUSTOM = True
 
 logo = [
@@ -39,8 +39,10 @@ Custom_Instructions = [
     "->5<- Read message (Asymetric)",
     "->6<- Create certificate",
     "->7<- Verify certificate",
-    "->8<- Conversation (Symetric)",
-    "->9<- Exit",
+    "->8<- Start Conversation (Symetric)",
+    "->9<- Send message (Symetric)",
+    "->10<- Read message (Symetric)",
+    "->11<- Exit",
 ]
 
 
@@ -312,10 +314,78 @@ if __name__ == "__main__":
                     print(f"Certificat de {user.getUsername()} valide: {validity}")
 
                 case "8":
-                    print("Conversation")
+                    print("Start conversation")
+
+                    if current_user is None:
+                        print("Please select a user")
+                        continue
+
+
+                    print("List :")
+                    [print(user) for user in User.users_list()]
+                    username = input("> ")
+
+                    if username not in User.users_list():
+                        print("Unknown user")
+                        continue
+
+                    other = User(username)
+                    chain_key = KDF.generate_chain_key()
+                    salt = KDF.generate_salt()
+
+                    logging.info(f"chain_key : {chain_key}")
+                    logging.info(f"salt : {salt}")
+
+                    Conversation.create_conversation(current_user, other, chain_key, salt)
 
 
                 case "9":
+                    print("Send message")
+                    if current_user is None:
+                        print("Please select a user")
+                        continue
+
+                    print("List :")
+                    [print(user) for user in User.users_list()]
+                    username = input("> ")
+
+                    if username not in User.users_list():
+                        print("Unknown user")
+                        continue
+
+                    message = input("Message > ")
+
+                    other = User(username)
+                    conversation = Conversation(current_user, other)
+                    current_user.setConversation(conversation)
+                    current_user.send_message_conversation(message)
+
+
+                case "10":
+                    print("Read message")
+                    if current_user is None:
+                        print("Please select a user")
+                        continue
+
+                    print("List :")
+                    [print(user) for user in User.users_list()]
+                    username = input("> ")
+
+                    other = User(username)
+
+                    conversation = Conversation(current_user, other)
+                    current_user.setConversation(conversation)
+
+                    messages = current_user.get_messages_conversation()
+                    print("Messages :")
+                    for message in messages:
+                        print(f"id : {message['id']}")
+                        print(f"sender : {message['sender']}")
+                        print(f"time : {message['time']}")
+                        print(f"message : {message['message']}")
+                        print("")
+
+                case "11":
                     print("Exit")
                     exit()
 

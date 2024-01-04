@@ -1,5 +1,7 @@
 from tools.Hash import sha256
 import bitarray
+import string
+import random
 
 class KDF():
     """
@@ -32,5 +34,13 @@ class KDF():
         bt.frombytes(message_key.encode())
 
         return bt.to01()[:self.length]
+    
+    @staticmethod
+    def generate_salt():
+        return "".join([random.choice(string.ascii_letters) for _ in range(16)])
+    
+    @staticmethod
+    def generate_chain_key():
+        return "".join([random.choice(string.ascii_letters) for _ in range(32)])
         
 
