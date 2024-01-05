@@ -277,6 +277,23 @@ class TestProofOfKnowledge(unittest.TestCase):
         User.delete_user("AliceTest")
         User.delete_user("BobTest")
 
+
+class TestDiffieHellman(unittest.TestCase):
+
+    def test_diffie_hellman(self):
+        User.create_user("AliceTest")
+        User.create_user("BobTest")
+
+        Alice = User("AliceTest")
+        Bob = User("BobTest")
+
+        Alice.diffie_hellman_init(Bob)
+
+        self.assertEqual(Alice.diffie_hellman_key, Bob.diffie_hellman_key)
+
+        User.delete_user("AliceTest")
+        User.delete_user("BobTest")
+
         
 
 if __name__ == "__main__":

@@ -75,14 +75,12 @@ def sha256(message):
     # Final hash
     return ''.join(format(h, '08x') for h in H)
 
-import hashlib
-
 def hmac_sha256(key, message):
     block_size = 64  # SHA-256 block size in bytes
 
     # Key padding
     if len(key) > block_size:
-        key = hashlib.sha256(key).digest()
+        key = sha256(key)
     elif len(key) < block_size:
         key += b'\x00' * (block_size - len(key))
 
@@ -98,6 +96,6 @@ def hmac_sha256(key, message):
 
     # Outer hash
     outer_hash_input = bytes(outer_pad) + inner_hash
-    outer_hash = hashlib.sha256(outer_hash_input).hexdigest()
+    outer_hash = sha256(outer_hash_input)
 
     return outer_hash
