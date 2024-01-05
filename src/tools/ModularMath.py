@@ -148,3 +148,18 @@ class ModularMath:
             result = bitarray.bitarray("0" * (bit_size - len(result))) + result
 
         return result
+    
+
+    @staticmethod
+    def euler_totient(n):
+        """
+        Euleur Totient function
+        :param n: integer
+        :return: Euleur Totient of n
+        """
+
+        result = 1
+        for i in range(2, n):
+            if ModularMath.gcd(i, n) == 1:
+                result += 1
+        return result

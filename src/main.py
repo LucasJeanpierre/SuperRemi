@@ -3,6 +3,7 @@ from tools.Hash import *
 from tools.CertificateAuthority import *
 from tools.User import *
 from tools.KDF import *
+from tools.ModularMath import *
 import logging
 import json
 
@@ -42,7 +43,8 @@ Custom_Instructions = [
     "->8<- Start Conversation (Symetric)",
     "->9<- Send message (Symetric)",
     "->10<- Read message (Symetric)",
-    "->11<- Exit",
+    "->11<- Proof of knowledge",
+    "->12<- Exit",
 ]
 
 
@@ -178,28 +180,58 @@ if __name__ == "__main__":
     if CUSTOM == False:
         instructionHandler()
     elif DEBUG == True:
-        Alice = User("Alice")
-        Bob = User("Bob")
 
-        # chain_key = "chain_key"
-        # salt = "salt"
+        # Peggy (prover)
+        AliceKeys = RSA.keyGen()
 
-        # Conversation.create_conversation(Alice, Bob, chain_key, salt)
+        N = AliceKeys[0][0]
+        e = AliceKeys[0][1]
 
-        alice_conversation = Conversation(Alice, Bob)
-        Alice.setConversation(alice_conversation)
-        #Alice.send_message_conversation("How are you?2")
 
-    
+        print(f"N : {N}")
+        print(f"e : {e}")
 
-        bob_conversation = Conversation(Bob, Alice)
-        Bob.setConversation(bob_conversation)
-        Bob.send_message_conversation("Hi Alice!")
-        # Bob.send_message_conversation("I'm fine, thanks!")
+        x = AliceKeys[1][1]
+        X = pow(x, e, N)
 
-        # Alice.send_message_conversation("Good to hear that!")
+        x = AliceKeys[1][1]
 
-        print(Bob.get_messages_conversation())
+        print(f"x : {x}")
+
+        print(f"X : {X}")
+
+        y = random.randrange(pow(2,254), pow(2,255))
+
+        while (ModularMath.gcd(y,N)) != 1:
+            y = random.randrange(pow(2,254), pow(2,255))
+
+
+
+        print(f"y : {y}")
+
+        Y = pow(y, e, N)
+
+        print(f"Y : {Y}")
+
+        # Victor (verifier)
+
+        c = random.randrange(pow(2,254), pow(2,255))
+
+        # Peggy (prover)
+
+        z = (y * pow(x, c, N)) % N
+
+        # Victor (verifier)
+
+        val1 = pow(z, e, N)
+        val2 = (Y * pow(X, c, N)) % N
+
+        print(f"val1 : {val1}")
+        print(f"val2 : {val2}")
+        print(f"val1 == val2 : {val1 == val2}")
+
+
+
 
 
 
@@ -292,7 +324,7 @@ if __name__ == "__main__":
                         continue
                         
                     certificateAuthority = CertificateAuthority.getAuthority()
-                    certificate = certificateAuthority.create_certificate(current_user.getPublicKey(), current_user.getUsername())
+                    certificate = certificateAuthority.create_certificate(current_user.getPublicKey(), current_user.getUsername(), current_user.getProof())
                     print(f"Certificat de {current_user}: {certificate}")
 
                 case "7":
@@ -386,6 +418,26 @@ if __name__ == "__main__":
                         print("")
 
                 case "11":
+                    print("Proof of knowledge")
+                    if current_user is None:
+                        print("Please select a user")
+                        continue
+
+                    print("List :")
+                    [print(user) for user in User.users_list()]
+                    username = input("> ")
+
+                    if username not in User.users_list():
+                        print("Unknown user")
+                        continue
+
+                    other = User(username)
+
+                    print(f'Validity : {current_user.ask_for_proof_of_knowledge(other.getUsername())}')
+
+
+
+                case "12":
                     print("Exit")
                     exit()
 

@@ -8,7 +8,7 @@ class CertificateAuthority:
         self.public_key = public_key
         self.private_key = private_key
 
-    def create_certificate(self, entity_public_key, entity_name):
+    def create_certificate(self, entity_public_key, entity_name, proof):
         # Create a certificate for the entity
         certificate_data = f"{entity_name}:{entity_public_key[0]}:{entity_public_key[1]}"
 
@@ -22,6 +22,7 @@ class CertificateAuthority:
         certificate = {
             'entity_name': entity_name,
             'entity_public_key': entity_public_key,
+            'proof': proof,
             'signature': signature
         }
 

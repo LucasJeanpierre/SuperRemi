@@ -2,7 +2,7 @@ import unittest
 import bitarray
 from tools.ModularMath import ModularMath
 from tools.Cipher import RSA, SerpentCipher
-from tools.Hash import sha256
+from tools.Hash import sha256, hmac_sha256
 from tools.CertificateAuthority import CertificateAuthority
 from tools.User import User
 from tools.KDF import KDF
@@ -27,22 +27,35 @@ class TestGCD(unittest.TestCase):
         self.assertEqual(ModularMath.gcd(221, 782), 17)
 
 
+class TestEulerTotient(unittest.TestCase):
+        
+    def test_euler_totient_1(self):
+        self.assertEqual(ModularMath.euler_totient(7), 6)
+
+    def test_euler_totient_2(self):
+        self.assertEqual(ModularMath.euler_totient(10), 4)
+
+    def test_euler_totient_3(self):
+        self.assertEqual(ModularMath.euler_totient(123456), 41088)
+        
+
+
 class TestModInverse(unittest.TestCase):
     
-        def test_mod_inverse_1(self):
-            self.assertEqual(ModularMath.mod_inverse(3, 7), 5)
-    
-        def test_mod_inverse_2(self):
-            self.assertEqual(ModularMath.mod_inverse(3, 8), 3)
-    
-        def test_mod_inverse_3(self):
-            self.assertEqual(ModularMath.mod_inverse(3, 9), None)
-    
-        def test_mod_inverse_4(self):
-            self.assertEqual(ModularMath.mod_inverse(15, 782), 365)
-    
-        def test_mod_inverse_5(self):
-            self.assertEqual(ModularMath.mod_inverse(221, 782), None)
+    def test_mod_inverse_1(self):
+        self.assertEqual(ModularMath.mod_inverse(3, 7), 5)
+
+    def test_mod_inverse_2(self):
+        self.assertEqual(ModularMath.mod_inverse(3, 8), 3)
+
+    def test_mod_inverse_3(self):
+        self.assertEqual(ModularMath.mod_inverse(3, 9), None)
+
+    def test_mod_inverse_4(self):
+        self.assertEqual(ModularMath.mod_inverse(15, 782), 365)
+
+    def test_mod_inverse_5(self):
+        self.assertEqual(ModularMath.mod_inverse(221, 782), None)
 
 
 class TestIsPrime(unittest.TestCase):
@@ -144,6 +157,11 @@ class TestHash(unittest.TestCase):
     def test_sha256_1(self):
         self.assertEqual(sha256(b"gs15"), "d56a96741074dbb41a112252750dedaab23dcb0840e23c1eaebb902472f9b3d8")
 
+    def test_hmac_sha256_1(self):
+        self.assertEqual(hmac_sha256(b"admin", b"admin"), "f429ec54f354b72bed77a5c0afedecb91f347f479a09f74f4107592764b56d1c")
+
+    def test_hmac_sha256_1(self):
+        self.assertEqual(hmac_sha256(b"admin", b"gs15"), "0af840f4ce055536ff9919d1016f880c9112f356d46a69c5f2ca4e92bfbe7f2c")
 
 class TestCertificateAuthority(unittest.TestCase):
 
@@ -151,18 +169,24 @@ class TestCertificateAuthority(unittest.TestCase):
         with open("src/tools/keys/authority.json", "r") as f:
             authority_keys = json.load(f)
 
+        keys = RSA.keyGen()
+        User.create_user("CertificateTest", keys=keys)
+        
+        user = User("CertificateTest")
+
+
         Authority = CertificateAuthority(authority_keys['public'], authority_keys['private'])
 
         keys = RSA.keyGen()
         WrongAuthority = CertificateAuthority(keys[0], keys[1])
 
-        Company = RSA.keyGen()
-
-        CompanyCertificate = Authority.create_certificate(Company[0], "UTT")
-        WrongCompanyCertificate = WrongAuthority.create_certificate(Company[0], "UTT")
+        CompanyCertificate = Authority.create_certificate(user.getPublicKey(), user.username, user.getProof())
+        WrongCompanyCertificate = WrongAuthority.create_certificate(user.getPublicKey(), user.username, user.getProof())
 
         self.assertEqual(Authority.verify_certificate(CompanyCertificate), True)
         self.assertEqual(Authority.verify_certificate(WrongCompanyCertificate), False)
+
+        User.delete_user("CertificateTest")
 
 
 class TestUser(unittest.TestCase):
@@ -217,6 +241,43 @@ class TestConversation(unittest.TestCase):
 
             User.delete_user("AliceTest")
             User.delete_user("BobTest")
+
+
+class TestProofOfKnowledge(unittest.TestCase):
+
+    def test_proof_of_knowledge_valid(self):
+
+        User.create_user("AliceTest")
+        User.create_user("BobTest")
+
+        Alice = User("AliceTest")
+        Bob = User("BobTest")
+
+        certificateAuthority = CertificateAuthority.getAuthority()
+        certificateAuthority.create_certificate(Alice.getPublicKey(), Alice.getUsername(), Alice.getProof())
+
+        self.assertEqual(Bob.ask_for_proof_of_knowledge(Alice.getUsername()),True)
+
+        User.delete_user("AliceTest")
+        User.delete_user("BobTest")
+
+    def test_proof_of_knowledge_invalid(self):
+
+        User.create_user("AliceTest")
+        User.create_user("BobTest")
+
+        Alice = User("AliceTest")
+        Bob = User("BobTest")
+
+        certificateAuthority = CertificateAuthority.getAuthority()
+        certificateAuthority.create_certificate(Alice.getPublicKey(), Alice.getUsername(), 15)
+
+        self.assertEqual(Bob.ask_for_proof_of_knowledge(Alice.getUsername()),True)
+
+        User.delete_user("AliceTest")
+        User.delete_user("BobTest")
+
+        
 
 if __name__ == "__main__":
     unittest.main()

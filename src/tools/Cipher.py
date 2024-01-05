@@ -512,6 +512,13 @@ class RSA(AsymmetricCipher):
         message = libnum.s2n(message)
         signature = int(signature)
         return message == pow(signature, self.public_key[1], self.public_key[0])
+    
+
+    def generateGillouQuisquaterValue(self):
+        """
+        Generate Gillou Quisquater value
+        """
+        return pow(self.private_key[1], self.public_key[1], self.public_key[0])
 
         
         
