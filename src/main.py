@@ -180,60 +180,7 @@ if __name__ == "__main__":
     if CUSTOM == False:
         instructionHandler()
     elif DEBUG == True:
-
-        # Peggy (prover)
-        AliceKeys = RSA.keyGen()
-
-        N = AliceKeys[0][0]
-        e = AliceKeys[0][1]
-
-
-        print(f"N : {N}")
-        print(f"e : {e}")
-
-        x = AliceKeys[1][1]
-        X = pow(x, e, N)
-
-        x = AliceKeys[1][1]
-
-        print(f"x : {x}")
-
-        print(f"X : {X}")
-
-        y = random.randrange(pow(2,254), pow(2,255))
-
-        while (ModularMath.gcd(y,N)) != 1:
-            y = random.randrange(pow(2,254), pow(2,255))
-
-
-
-        print(f"y : {y}")
-
-        Y = pow(y, e, N)
-
-        print(f"Y : {Y}")
-
-        # Victor (verifier)
-
-        c = random.randrange(pow(2,254), pow(2,255))
-
-        # Peggy (prover)
-
-        z = (y * pow(x, c, N)) % N
-
-        # Victor (verifier)
-
-        val1 = pow(z, e, N)
-        val2 = (Y * pow(X, c, N)) % N
-
-        print(f"val1 : {val1}")
-        print(f"val2 : {val2}")
-        print(f"val1 == val2 : {val1 == val2}")
-
-
-
-
-
+        print("DEBUG MODE")
 
     else:
         current_user = None
@@ -324,7 +271,7 @@ if __name__ == "__main__":
                         continue
                         
                     certificateAuthority = CertificateAuthority.getAuthority()
-                    certificate = certificateAuthority.create_certificate(current_user.getPublicKey(), current_user.getUsername(), current_user.getProof())
+                    certificate = certificateAuthority.create_certificate(current_user.getPublicKey(), current_user.getUsername(), current_user.generateProof())
                     print(f"Certificat de {current_user}: {certificate}")
 
                 case "7":
@@ -362,6 +309,7 @@ if __name__ == "__main__":
                         continue
 
                     other = User(username)
+                    g = random.randrange(pow(2,254), pow(2,255))
                     chain_key = KDF.generate_chain_key()
                     salt = KDF.generate_salt()
 

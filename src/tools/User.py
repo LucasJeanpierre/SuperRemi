@@ -1,5 +1,6 @@
 from tools.Cipher import RSA
 from tools.Conversation import Conversation
+from tools.ModularMath import ModularMath
 import json
 import time
 import os
@@ -31,9 +32,22 @@ class User():
     def getPrivateKey(self):
         return self.private_key
     
-    def getProof(self):
+    def generateProof(self):
         rsa = RSA(self.public_key, self.private_key)
         return rsa.generateGillouQuisquaterValue()
+    
+    def getProof(self):
+        # Get proof from src/tools/keys/certificates.json
+        try:
+            with open("src/tools/keys/certificates.json", "r") as f:
+                certificates = json.load(f)
+        except:
+            raise ValueError("No certificate found")
+        
+        if self.username not in certificates:
+            raise ValueError("No certificate found")
+        
+        return certificates[self.username]['proof']
 
     def getUsername(self):
         return self.username
@@ -174,7 +188,37 @@ class User():
             return True
         else:
             return False
+        
+
+
+    def diffie_hellman_response(self, p, g, A):
+        """
+        Diffie-Hellman key operation
+        :param other_username: The other user
+        :return: None
+        """
+
+        secret = random.randrange(1,pow(2, 256))
+        B = pow(g, secret, p)
+        self.diffie_hellman_key = pow(A, secret, p)
+        return B
+
     
+    def diffie_hellman_init(self, other):
+        """
+        Diffie-Hellman key operation
+        :param other: The other user
+        :return: None
+        """
+
+        g = random.randrange(1,pow(2, 256))
+        p = ModularMath.generate_prime_number(256)
+        secret = random.randrange(1,pow(2, 256))
+        A = pow(g, secret , p)
+        B = other.diffie_hellman_response(p, g, A)
+
+        self.diffie_hellman_key = pow(B, secret, p)
+
 
 
     @staticmethod
