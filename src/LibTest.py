@@ -180,8 +180,8 @@ class TestCertificateAuthority(unittest.TestCase):
         keys = RSA.keyGen()
         WrongAuthority = CertificateAuthority(keys[0], keys[1])
 
-        CompanyCertificate = Authority.create_certificate(user.getPublicKey(), user.username, user.getProof())
-        WrongCompanyCertificate = WrongAuthority.create_certificate(user.getPublicKey(), user.username, user.getProof())
+        CompanyCertificate = Authority.create_certificate(user.getPublicKey(), user.username, user.generateProof())
+        WrongCompanyCertificate = WrongAuthority.create_certificate(user.getPublicKey(), user.username, user.generateProof())
 
         self.assertEqual(Authority.verify_certificate(CompanyCertificate), True)
         self.assertEqual(Authority.verify_certificate(WrongCompanyCertificate), False)
@@ -220,27 +220,27 @@ class TestKDF(unittest.TestCase):
 
 class TestConversation(unittest.TestCase):
     
-        def test_conversation(self):
-            User.create_user("AliceTest")
-            User.create_user("BobTest")
-            Alice = User("AliceTest")
-            Bob = User("BobTest")
+    def test_conversation(self):
+        User.create_user("AliceTest")
+        User.create_user("BobTest")
+        Alice = User("AliceTest")
+        Bob = User("BobTest")
 
-            chain_key = "chain_key"
-            salt = "salt"
+        chain_key = "chain_key"
+        salt = "salt"
 
-            Conversation.create_conversation(Alice, Bob, chain_key, salt)
-            alice_conversation = Conversation(Alice, Bob)
-            Alice.setConversation(alice_conversation)
-            Alice.send_message_conversation("Hello World!")
+        Conversation.create_conversation(Alice, Bob, chain_key, salt)
+        alice_conversation = Conversation(Alice, Bob)
+        Alice.setConversation(alice_conversation)
+        Alice.send_message_conversation("Hello World!")
 
-            bob_conversation = Conversation(Bob, Alice)
-            Bob.setConversation(bob_conversation)
-    
-            self.assertEqual(Bob.get_messages_conversation()[0]['message'], "Hello World!")
+        bob_conversation = Conversation(Bob, Alice)
+        Bob.setConversation(bob_conversation)
 
-            User.delete_user("AliceTest")
-            User.delete_user("BobTest")
+        self.assertEqual(Bob.get_messages_conversation()[0]['message'], "Hello World!")
+
+        User.delete_user("AliceTest")
+        User.delete_user("BobTest")
 
 
 class TestProofOfKnowledge(unittest.TestCase):
@@ -254,7 +254,7 @@ class TestProofOfKnowledge(unittest.TestCase):
         Bob = User("BobTest")
 
         certificateAuthority = CertificateAuthority.getAuthority()
-        certificateAuthority.create_certificate(Alice.getPublicKey(), Alice.getUsername(), Alice.getProof())
+        certificateAuthority.create_certificate(Alice.getPublicKey(), Alice.getUsername(), Alice.generateProof())
 
         self.assertEqual(Bob.ask_for_proof_of_knowledge(Alice.getUsername()),True)
 
@@ -272,7 +272,7 @@ class TestProofOfKnowledge(unittest.TestCase):
         certificateAuthority = CertificateAuthority.getAuthority()
         certificateAuthority.create_certificate(Alice.getPublicKey(), Alice.getUsername(), 15)
 
-        self.assertEqual(Bob.ask_for_proof_of_knowledge(Alice.getUsername()),True)
+        self.assertEqual(Bob.ask_for_proof_of_knowledge(Alice.getUsername()),False)
 
         User.delete_user("AliceTest")
         User.delete_user("BobTest")

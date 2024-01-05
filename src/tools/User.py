@@ -32,9 +32,22 @@ class User():
     def getPrivateKey(self):
         return self.private_key
     
-    def getProof(self):
+    def generateProof(self):
         rsa = RSA(self.public_key, self.private_key)
         return rsa.generateGillouQuisquaterValue()
+    
+    def getProof(self):
+        # Get proof from src/tools/keys/certificates.json
+        try:
+            with open("src/tools/keys/certificates.json", "r") as f:
+                certificates = json.load(f)
+        except:
+            raise ValueError("No certificate found")
+        
+        if self.username not in certificates:
+            raise ValueError("No certificate found")
+        
+        return certificates[self.username]['proof']
 
     def getUsername(self):
         return self.username

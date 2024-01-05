@@ -8,7 +8,7 @@ import logging
 import json
 
 
-DEBUG = True
+DEBUG = False
 CUSTOM = True
 
 logo = [
@@ -180,16 +180,7 @@ if __name__ == "__main__":
     if CUSTOM == False:
         instructionHandler()
     elif DEBUG == True:
-
-        Alice = User("Alice")   
-        Bob = User("Bob")
-
-        Alice.diffie_hellman_init(Bob)
-
-        print(Alice.diffie_hellman_key)
-        print(Bob.diffie_hellman_key)
-
-
+        print("DEBUG MODE")
 
     else:
         current_user = None
@@ -280,7 +271,7 @@ if __name__ == "__main__":
                         continue
                         
                     certificateAuthority = CertificateAuthority.getAuthority()
-                    certificate = certificateAuthority.create_certificate(current_user.getPublicKey(), current_user.getUsername(), current_user.getProof())
+                    certificate = certificateAuthority.create_certificate(current_user.getPublicKey(), current_user.getUsername(), current_user.generateProof())
                     print(f"Certificat de {current_user}: {certificate}")
 
                 case "7":
