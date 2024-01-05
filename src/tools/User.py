@@ -30,6 +30,10 @@ class User():
 
     def getPrivateKey(self):
         return self.private_key
+    
+    def getProof(self):
+        rsa = RSA(self.public_key, self.private_key)
+        return rsa.generateGillouQuisquaterValue()
 
     def getUsername(self):
         return self.username
@@ -126,6 +130,53 @@ class User():
         return messages
         
     
+    def ask_for_proof_of_knowledge(self, recipient_name):
+        """
+        Ask for a proof of knowledge
+        :param recipient: The recipient of the message
+        :return: None
+        """
+
+        recipient = User(recipient_name)
+        c = random.randrange(1,pow(2, 256))
+        return recipient.send_proof_of_knowledge(self.username, c)
+        
+    
+    def send_proof_of_knowledge(self, applicant_name, c):
+        """
+        Sends a proof of knowledge
+        :param recipient: The recipient of the message
+        :param c: The proof of complete
+        :return: None
+        """
+
+        applicant = User(applicant_name)
+        y = random.randrange(1,pow(2, 256))
+        Y = pow(y, self.public_key[1], self.public_key[0])
+        z = (y * pow(self.private_key[1], c, self.private_key[0])) % self.private_key[0]
+
+        return applicant.check_proof_of_knowledge(self.username, Y, z, c)
+
+
+    def check_proof_of_knowledge(self, recipient_name, Y, z, c):
+        """
+        Checks a proof of knowledge
+        :param recipient: The recipient of the message
+        :param Y, z, c: The needed values for the proof
+        :return: None
+        """
+
+        recipient = User(recipient_name)
+        value1 = pow(z, recipient.public_key[1], recipient.public_key[0])
+        value2 = (Y * pow(recipient.getProof(), c, recipient.getPublicKey()[0])) % recipient.getPublicKey()[0]
+
+        if value1 == value2:
+            return True
+        else:
+            return False
+    
+
+
     @staticmethod
     def create_user(username: str, keys=None):
         """
@@ -167,7 +218,7 @@ class User():
         :param username: The username of the user
         :return: None
         """
-        # Get keys from src/tools/keys/public.json and src/tools/keys/
+        # Remove keys from src/tools/keys/public.json and src/tools/keys/
         try:
             with open("src/tools/keys/public.json", "r") as f:
                 public_keys = json.load(f)
@@ -186,6 +237,20 @@ class User():
             json.dump(public_keys, f)
         with open("src/tools/keys/private.json", "w") as f:
             json.dump(private_keys, f)
+
+        
+        # Remove certificate from src/tools/keys/certificates.json
+        try:
+            with open("src/tools/keys/certificates.json", "r") as f:
+                certificates = json.load(f)
+        except:
+            raise ValueError("No certificates found")
+        
+        if username in certificates:
+            del certificates[username]
+            with open("src/tools/keys/certificates.json", "w") as f:
+                json.dump(certificates, f)
+
 
         # Remove conversation file
         try:

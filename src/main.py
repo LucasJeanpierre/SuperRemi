@@ -3,11 +3,12 @@ from tools.Hash import *
 from tools.CertificateAuthority import *
 from tools.User import *
 from tools.KDF import *
+from tools.ModularMath import *
 import logging
 import json
 
 
-DEBUG = True
+DEBUG = False
 CUSTOM = True
 
 logo = [
@@ -179,7 +180,60 @@ if __name__ == "__main__":
     if CUSTOM == False:
         instructionHandler()
     elif DEBUG == True:
-        print(hmac_sha256("admin".encode(), "admin".encode())) 
+
+        # Peggy (prover)
+        AliceKeys = RSA.keyGen()
+
+        N = AliceKeys[0][0]
+        e = AliceKeys[0][1]
+
+
+        print(f"N : {N}")
+        print(f"e : {e}")
+
+        x = AliceKeys[1][1]
+        X = pow(x, e, N)
+
+        x = AliceKeys[1][1]
+
+        print(f"x : {x}")
+
+        print(f"X : {X}")
+
+        y = random.randrange(pow(2,254), pow(2,255))
+
+        while (ModularMath.gcd(y,N)) != 1:
+            y = random.randrange(pow(2,254), pow(2,255))
+
+
+
+        print(f"y : {y}")
+
+        Y = pow(y, e, N)
+
+        print(f"Y : {Y}")
+
+        # Victor (verifier)
+
+        c = random.randrange(pow(2,254), pow(2,255))
+
+        # Peggy (prover)
+
+        z = (y * pow(x, c, N)) % N
+
+        # Victor (verifier)
+
+        val1 = pow(z, e, N)
+        val2 = (Y * pow(X, c, N)) % N
+
+        print(f"val1 : {val1}")
+        print(f"val2 : {val2}")
+        print(f"val1 == val2 : {val1 == val2}")
+
+
+
+
+
 
     else:
         current_user = None
@@ -270,7 +324,7 @@ if __name__ == "__main__":
                         continue
                         
                     certificateAuthority = CertificateAuthority.getAuthority()
-                    certificate = certificateAuthority.create_certificate(current_user.getPublicKey(), current_user.getUsername())
+                    certificate = certificateAuthority.create_certificate(current_user.getPublicKey(), current_user.getUsername(), current_user.getProof())
                     print(f"Certificat de {current_user}: {certificate}")
 
                 case "7":
@@ -379,7 +433,7 @@ if __name__ == "__main__":
 
                     other = User(username)
 
-                    other_public_key = other.getPublicKey()
+                    print(f'Validity : {current_user.ask_for_proof_of_knowledge(other.getUsername())}')
 
 
 
