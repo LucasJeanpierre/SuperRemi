@@ -7,6 +7,7 @@ from tools.CertificateAuthority import CertificateAuthority
 from tools.User import User
 from tools.KDF import KDF
 from tools.Conversation import Conversation
+from tools.BlockChain import Blockchain
 import json
 
 class TestGCD(unittest.TestCase):
@@ -294,6 +295,13 @@ class TestDiffieHellman(unittest.TestCase):
         User.delete_user("AliceTest")
         User.delete_user("BobTest")
 
+class TestBlockChain(unittest.TestCase):
+
+    def test_initblockchain(self):
+        blockchain = Blockchain()
+        blockchain.add_block("Alice", "Hello")
+
+        self.assertEqual(blockchain.get_latest_block().data, "Hello")
         
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ from tools.CertificateAuthority import *
 from tools.User import *
 from tools.KDF import *
 from tools.ModularMath import *
+from tools.BlockChain import *
 import logging
 import json
 
@@ -44,7 +45,8 @@ Custom_Instructions = [
     "->9<- Send message (Symetric)",
     "->10<- Read message (Symetric)",
     "->11<- Proof of knowledge",
-    "->12<- Exit",
+    "->12<- Save document in safe",
+    "->13<- Exit",
 ]
 
 
@@ -182,8 +184,16 @@ if __name__ == "__main__":
     elif DEBUG == True:
         print("DEBUG MODE")
 
+        blockchain = Blockchain()
+        blockchain.add_block("Alice", "Hello")
+        blockchain.add_block("Bob", "World")
+
+        blockchain.print()
+        
+
     else:
         current_user = None
+        blockchain = Blockchain()
 
         for line in logo:
             print(line)
@@ -384,8 +394,20 @@ if __name__ == "__main__":
                     print(f'Validity : {current_user.ask_for_proof_of_knowledge(other.getUsername())}')
 
 
-
                 case "12":
+                    print("Save document in safe")
+
+                    if current_user is None:
+                        print("Please select a user")
+                        continue
+
+                    blockchain.add_block(current_user.getUsername(), input("Document > "))
+
+                    blockchain.print()
+
+
+
+                case "13":
                     print("Exit")
                     exit()
 
