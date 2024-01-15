@@ -52,18 +52,18 @@ class Conversation:
         try:
             with open(f"src/tools/conversations/{me.username}.json", "r") as f:
 
-
-                if not other.username in conversations:
-                    conversations[other.username] = {
-                        'chain_key': encrypted_chain_key,
-                        'salt': encrypted_salt
-                    }
+                conversations[other.username] = {
+                    'chain_key': encrypted_chain_key,
+                    'salt': encrypted_salt,
+                    'messages': []
+                }
                     
         except:
             conversations = {}
             conversations[other.username] = {
                 'chain_key': encrypted_chain_key,
-                'salt': encrypted_salt
+                'salt': encrypted_salt,
+                'messages': []
             }
         
 
@@ -83,18 +83,19 @@ class Conversation:
             with open(f"src/tools/conversations/{other.username}.json", "r") as f:
                 conversations = json.load(f)
 
-                if not me.username in conversations:
-                    conversations[me.username] = {
-                        'chain_key': encrypted_chain_key,
-                        'salt': encrypted_salt
-                    }
+                conversations[me.username] = {
+                    'chain_key': encrypted_chain_key,
+                    'salt': encrypted_salt,
+                    'messages': []
+                }
                 
                     
         except:
             conversations = {}
             conversations[me.username] = {
                 'chain_key': encrypted_chain_key,
-                'salt': encrypted_salt
+                'salt': encrypted_salt,
+                'messages': []
             }
         
         
@@ -155,7 +156,7 @@ class Conversation:
                 'id': message['id'],
                 'sender': message['sender'],
                 'message': decrypted_message,
-                'time': message['time']
+                'time': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(message['time']))
             })
         
         return decrypted_messages

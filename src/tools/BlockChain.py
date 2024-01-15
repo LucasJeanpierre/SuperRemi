@@ -45,7 +45,7 @@ class Blockchain:
     def print(self):
         for block in self.chain:
             print(f"Index: {block.index}")
-            print(f"Timestamp: {block.timestamp}")
+            print(f"Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(block.timestamp))}")
             print(f"User: {block.user}")
             print(f"Data: {block.data}")
             print(f"Previous Hash: {block.previous_hash}")
