@@ -1,2 +1,2 @@
 # SuperRemi
-GS15 project
+Mini Cryptography PKI Project
